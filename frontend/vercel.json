@@ -1,0 +1,17 @@
+{
+  "rewrites": [
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/register", "destination": "/register.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/trips", "destination": "/trips.html" },
+    { "source": "/booking", "destination": "/booking.html" },
+    { "source": "/bookings", "destination": "/bookings.html" },
+    { "source": "/ticket", "destination": "/ticket.html" },
+    { "source": "/admin/login", "destination": "/admin-login.html" },
+    { "source": "/admin", "destination": "/admin/dashboard.html" },
+    { "source": "/admin/buses", "destination": "/admin/buses.html" },
+    { "source": "/admin/trips", "destination": "/admin/trips.html" },
+    { "source": "/admin/bookings", "destination": "/admin/bookings.html" },
+    { "source": "/(.*)", "destination": "/$1" }
+  ]
+}
