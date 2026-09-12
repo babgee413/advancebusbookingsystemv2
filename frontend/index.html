@@ -290,7 +290,7 @@
 
     async function loadHomepageStats() {
       try {
-        const res = await fetch('/api/buses');
+        const res = await fetch(API_BASE + '/buses');
         const data = await res.json();
         if (data.success && data.data) {
           const activeBuses = data.data.filter(b => b.status === 'active').length;

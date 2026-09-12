@@ -1,4 +1,6 @@
-const API_BASE = '/api';
+const API_BASE = window.location.hostname === 'localhost'
+  ? '/api'
+  : 'https://advancebusbookingsystemv2.onrender.com/api';
 
 function getToken() {
   return localStorage.getItem('token');
