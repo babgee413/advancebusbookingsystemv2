@@ -27,7 +27,8 @@ pool.getConnection()
     conn.release();
   })
   .catch(err => {
-    console.error('Database connection failed:', err.message);
+    console.error('Database connection failed:', err.code, err.message);
+    console.error('DB config:', { host: process.env.DB_HOST, port: process.env.DB_PORT, user: process.env.DB_USER, database: process.env.DB_NAME, ssl: !!sslConfig });
   });
 
 module.exports = pool;

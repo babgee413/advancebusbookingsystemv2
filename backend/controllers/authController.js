@@ -146,6 +146,7 @@ exports.register = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Register error:', error.code, error.message);
     // Rollback on any error
     if (connection) {
       await connection.rollback().catch(() => {});
@@ -249,6 +250,7 @@ exports.login = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Login error:', error.code, error.message);
     if (error.code === 'ECONNRESET' || error.code === 'PROTOCOL_CONNECTION_LOST') {
       return res.status(503).json({
         success: false,
