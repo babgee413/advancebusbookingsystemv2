@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#003366"/>
+  <text x="96" y="72" font-family="Arial,sans-serif" font-size="28" font-weight="800" fill="#f0c040" text-anchor="middle" letter-spacing="2">ATBU</text>
+  <text x="96" y="105" font-family="Arial,sans-serif" font-size="18" font-weight="600" fill="#ffffff" text-anchor="middle">SHUTTLE</text>
+  <rect x="40" y="120" width="112" height="3" rx="1.5" fill="#f0c040" opacity="0.5"/>
+  <text x="96" y="150" font-family="Arial,sans-serif" font-size="11" fill="rgba(255,255,255,0.6)" text-anchor="middle">Yelwa ↔ Gubi</text>
+</svg>

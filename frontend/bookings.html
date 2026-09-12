@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tickets - ATBU Shuttle</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBU Shuttle</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="user-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings" class="active">My Tickets</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings" class="active">My Tickets</a></li>
+        <li><a href="/admin">Admin</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem;">
+    <h1 style="margin-bottom:0.5rem;">My Tickets</h1>
+    <p style="color:var(--text-secondary);margin-bottom:1.5rem;">View and manage all your bus tickets.</p>
+
+    <div id="tickets-loading">
+      <div class="skeleton-card" style="margin-bottom:1rem;">
+        <div class="skeleton skeleton-line long"></div>
+        <div class="skeleton skeleton-line medium"></div>
+      </div>
+      <div class="skeleton-card" style="margin-bottom:1rem;">
+        <div class="skeleton skeleton-line long"></div>
+        <div class="skeleton skeleton-line medium"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-line long"></div>
+        <div class="skeleton skeleton-line medium"></div>
+      </div>
+    </div>
+
+    <div id="tickets-list" style="display:none;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBU Shuttle. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!requireAuth()) throw new Error('Not authenticated');
+
+    async function loadBookings() {
+      const res = await apiRequest('/bookings/my');
+
+      document.getElementById('tickets-loading').style.display = 'none';
+      document.getElementById('tickets-list').style.display = 'block';
+
+      if (!res || !res.success) {
+        document.getElementById('tickets-list').innerHTML = '<div class="alert alert-error">Failed to load bookings. <button class="btn btn-sm btn-primary" onclick="location.reload()" style="margin-left:0.5rem;">Retry</button></div>';
+        return;
+      }
+
+      const bookings = res.data;
+      if (bookings.length === 0) {
+        document.getElementById('tickets-list').innerHTML = '<div class="empty-state"><div class="icon">🎫</div><h3>No bookings yet</h3><p>You haven\'t booked any bus tickets yet.</p><a href="/trips" class="btn btn-primary">Browse Trips</a></div>';
+        return;
+      }
+
+      let html = '<div class="bookings-table-wrapper"><table class="bookings-table"><thead><tr><th>Ticket No</th><th>Route</th><th>Date</th><th>Time</th><th>Amount</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead><tbody>';
+
+      for (const b of bookings) {
+        const statusClass = b.booking_status === 'confirmed' ? 'status-confirmed' :
+                           b.booking_status === 'cancelled' ? 'status-cancelled' :
+                           b.booking_status === 'rejected' ? 'status-rejected' :
+                           b.booking_status === 'no_show' ? 'status-cancelled' :
+                           'status-pending';
+        const paymentClass = b.payment_status === 'paid' ? 'status-confirmed' : 'status-pending';
+        const canView = b.booking_status === 'confirmed' || b.booking_status === 'completed';
+
+        html += `<tr>
+          <td><strong>${b.ticket_number}</strong></td>
+          <td>${b.origin} → ${b.destination}</td>
+          <td>${formatDate(b.departure_date)}</td>
+          <td>${formatTime(b.departure_time)}</td>
+          <td>${formatCurrency(b.amount_paid)}</td>
+          <td><span class="${statusClass}">${b.booking_status.replace('_', ' ').toUpperCase()}</span></td>
+          <td><span class="${paymentClass}">${b.payment_status.toUpperCase()}</span></td>
+          <td>
+            ${canView
+              ? `<a href="/ticket?ticket=${b.ticket_number}" class="btn btn-sm btn-primary">View Ticket</a>`
+              : `<span style="color:var(--text-secondary);font-size:0.85rem;">${b.booking_status.replace('_', ' ')}</span>`
+            }
+          </td>
+        </tr>`;
+      }
+
+      html += '</tbody></table></div>';
+      document.getElementById('tickets-list').innerHTML = html;
+    }
+
+    loadBookings();
+  </script>
+</body>
+</html>

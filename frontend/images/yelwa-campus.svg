@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003366;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#c8102e;stop-opacity:0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg1)" rx="12"/>
+  <!-- Building -->
+  <rect x="100" y="60" width="200" height="180" fill="#003366" rx="6"/>
+  <rect x="115" y="80" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="160" y="80" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="205" y="80" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="250" y="80" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="115" y="125" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="160" y="125" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="205" y="125" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="250" y="125" width="35" height="35" fill="#87CEEB" rx="3"/>
+  <rect x="170" y="180" width="60" height="60" fill="#002244" rx="3"/>
+  <text x="200" y="50" font-family="Arial,sans-serif" font-size="16" fill="#003366" font-weight="bold" text-anchor="middle">Yelwa Campus</text>
+  <!-- Trees -->
+  <circle cx="60" cy="200" r="30" fill="#2E7D32"/>
+  <circle cx="340" cy="200" r="25" fill="#388E3C"/>
+  <rect x="58" y="215" width="6" height="20" fill="#5D4037"/>
+  <rect x="338" y="215" width="5" height="18" fill="#5D4037"/>
+  <!-- Ground -->
+  <rect x="0" y="240" width="400" height="60" fill="#43A047" rx="0"/>
+</svg>

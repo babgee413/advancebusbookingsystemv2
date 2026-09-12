@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - ATBU Shuttle</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'">
+      <span>ATBU Shuttle</span>
+    </a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="auth-nav">
+        <li><a href="/login">User Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
+      <ul class="navbar-nav" id="user-nav"></ul>
+      <ul class="navbar-nav" id="admin-nav"></ul>
+    </div>
+  </nav>
+
+  <div class="admin-login-container">
+    <div class="admin-login-card">
+      <div class="admin-badge">ADMIN ACCESS</div>
+      <h2>Admin Dashboard</h2>
+      <p class="subtitle">Sign in with your administrator credentials</p>
+
+      <div id="alert-container"></div>
+
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label for="login_identifier">Email or Registration Number</label>
+          <input type="text" id="login_identifier" class="form-control" placeholder="admin@atbu.edu.ng" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Enter admin password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="login-btn">
+          <span class="btn-spinner"></span>
+          <span class="btn-text">Sign In to Admin Panel</span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p><a href="/login">← Back to User Login</a></p>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (isLoggedIn()) {
+      const user = getUser();
+      if (user && user.role === 'admin') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
+
+    let submitting = false;
+
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      if (submitting) return;
+
+      const btn = document.getElementById('login-btn');
+      const container = document.getElementById('alert-container');
+      container.innerHTML = '';
+
+      const login_identifier = document.getElementById('login_identifier').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!login_identifier || !password) {
+        container.innerHTML = '<div class="alert alert-danger">Both fields are required.</div>';
+        return;
+      }
+
+      submitting = true;
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ login_identifier, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message);
+        }
+
+        if (data.data.role !== 'admin') {
+          throw new Error('This account does not have admin privileges. Please use the regular login.');
+        }
+
+        setToken(data.data.token);
+        setUser(data.data);
+        window.location.href = '/admin';
+      } catch (error) {
+        container.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        submitting = false;
+      }
+    }
+  </script>
+</body>
+</html>

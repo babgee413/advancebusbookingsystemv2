@@ -1,0 +1,17 @@
+{
+  "name": "atbu-bus-booking-system",
+  "version": "1.0.0",
+  "description": "ATBU Yelwa-Gubi Inter-Campus Bus Transport Booking and Seat Reservation System",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && nodemon server.js",
+    "migrate": "cd backend && node database/migrate.js",
+    "seed": "cd backend && node database/seed.js",
+    "reset": "cd backend && node database/reset.js",
+    "setup": "cd backend && npm install"
+  },
+  "keywords": ["atbu", "bus-booking", "seat-reservation", "shuttle"],
+  "author": "ATBU Project",
+  "license": "MIT"
+}

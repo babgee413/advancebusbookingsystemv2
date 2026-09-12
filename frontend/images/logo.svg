@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="48" fill="#003366"/>
+  <text x="50" y="42" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">ATBU</text>
+  <text x="50" y="58" font-family="Arial, sans-serif" font-size="9" fill="#f0c040" text-anchor="middle">SHUTTLE</text>
+  <rect x="30" y="64" width="40" height="3" rx="1.5" fill="#c8102e"/>
+</svg>

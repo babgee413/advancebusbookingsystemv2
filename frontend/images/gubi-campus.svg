@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003366;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#c8102e;stop-opacity:0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg2)" rx="12"/>
+  <!-- Building -->
+  <rect x="80" y="70" width="240" height="170" fill="#003366" rx="6"/>
+  <rect x="95" y="90" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="145" y="90" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="195" y="90" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="245" y="90" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="95" y="140" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="145" y="140" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="195" y="140" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="245" y="140" width="40" height="40" fill="#87CEEB" rx="3"/>
+  <rect x="170" y="190" width="60" height="50" fill="#002244" rx="3"/>
+  <text x="200" y="58" font-family="Arial,sans-serif" font-size="16" fill="#003366" font-weight="bold" text-anchor="middle">Gubi Campus</text>
+  <!-- Trees -->
+  <circle cx="50" cy="210" r="28" fill="#2E7D32"/>
+  <circle cx="350" cy="200" r="22" fill="#388E3C"/>
+  <rect x="48" y="225" width="5" height="18" fill="#5D4037"/>
+  <rect x="348" y="215" width="5" height="15" fill="#5D4037"/>
+  <!-- Ground -->
+  <rect x="0" y="240" width="400" height="60" fill="#43A047" rx="0"/>
+</svg>

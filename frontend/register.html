@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - ATBU Bus Booking</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'">
+      <span>ATBU Shuttle</span>
+    </a>
+    <button class="mobile-toggle">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="auth-nav">
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
+      <ul class="navbar-nav" id="user-nav"></ul>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Create Account</h2>
+      <p class="subtitle">Register for ATBU Shuttle booking</p>
+      
+      <div id="alert-container"></div>
+      
+      <form id="register-form" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label for="registration_number">Registration Number</label>
+          <input type="text" id="registration_number" class="form-control" placeholder="e.g., 21/63227u/6" required>
+          <small style="color:var(--text-muted);font-size:0.8rem;">Format: 2 digits / 5 digits 1 lowercase letter / 1 digit</small>
+        </div>
+        <div class="form-group">
+          <label for="full_name">Full Name</label>
+          <input type="text" id="full_name" class="form-control" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="your.email@atbu.edu.ng" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="At least 6 characters" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" class="form-control" placeholder="Confirm your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="register-btn">
+          <span class="btn-spinner"></span>
+          <span class="btn-text">Register</span>
+        </button>
+      </form>
+      
+      <div class="auth-footer">
+        <p>Already have an account? <a href="/login">Login here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (isLoggedIn()) {
+      window.location.href = '/dashboard';
+    }
+
+    const REG_NUMBER_REGEX = /^\d{2}\/\d{5}[a-z]\/\d{1}$/;
+    let submitting = false;
+
+    function showFieldError(fieldId, message) {
+      const container = document.getElementById('alert-container');
+      container.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+      const field = document.getElementById(fieldId);
+      if (field) field.focus();
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      if (submitting) return;
+
+      const btn = document.getElementById('register-btn');
+      const container = document.getElementById('alert-container');
+      container.innerHTML = '';
+
+      const registration_number = document.getElementById('registration_number').value.trim();
+      const full_name = document.getElementById('full_name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+
+      if (!registration_number) {
+        showFieldError('registration_number', 'Registration number is required.');
+        return;
+      }
+
+      if (!REG_NUMBER_REGEX.test(registration_number)) {
+        showFieldError('registration_number', 'Please enter a valid registration number (e.g., 21/63227u/6).');
+        return;
+      }
+
+      if (!full_name) {
+        showFieldError('full_name', 'Full name is required.');
+        return;
+      }
+
+      if (!email) {
+        showFieldError('email', 'Email address is required.');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showFieldError('email', 'Please enter a valid email address.');
+        return;
+      }
+
+      if (!password) {
+        showFieldError('password', 'Password is required.');
+        return;
+      }
+
+      if (password.length < 6) {
+        showFieldError('password', 'Password must be at least 6 characters.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showFieldError('confirm_password', 'Passwords do not match.');
+        return;
+      }
+
+      submitting = true;
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            registration_number,
+            full_name,
+            email,
+            password,
+            confirm_password: confirmPassword
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message);
+        }
+
+        setToken(data.data.token);
+        setUser(data.data);
+        window.location.href = '/dashboard';
+      } catch (error) {
+        container.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        submitting = false;
+      }
+    }
+  </script>
+</body>
+</html>

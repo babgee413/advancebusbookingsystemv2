@@ -1,0 +1,48 @@
+{
+  "name": "ATBU Shuttle - Bus Booking",
+  "short_name": "ATBU Shuttle",
+  "description": "Book your inter-campus bus ticket for Yelwa ↔ Gubi shuttle at Abubakar Tafawa Balewa University, Bauchi.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#003366",
+  "theme_color": "#003366",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["transport", "education", "utilities"],
+  "icons": [
+    {
+      "src": "/images/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Book Ticket",
+      "short_name": "Book",
+      "url": "/trips",
+      "description": "Search and book available bus trips"
+    },
+    {
+      "name": "My Tickets",
+      "short_name": "Tickets",
+      "url": "/bookings",
+      "description": "View your booked tickets"
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your dashboard"
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - ATBU Bus Booking</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'">
+      <span>ATBU Shuttle</span>
+    </a>
+    <button class="mobile-toggle">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="auth-nav">
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
+      <ul class="navbar-nav" id="user-nav"></ul>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Login to your ATBU Shuttle account</p>
+      
+      <div id="alert-container"></div>
+      
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login_identifier">Registration Number or Email</label>
+          <input type="text" id="login_identifier" class="form-control" placeholder="e.g., 21/63227u/6 or email@atbu.edu.ng" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="login-btn">
+          <span class="btn-spinner"></span>
+          <span class="btn-text">Login</span>
+        </button>
+      </form>
+      
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="/register">Register here</a></p>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (isLoggedIn()) {
+      const user = getUser();
+      window.location.href = user && user.role === 'admin' ? '/admin' : '/dashboard';
+    }
+
+    let submitting = false;
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      if (submitting) return;
+
+      const btn = document.getElementById('login-btn');
+      const container = document.getElementById('alert-container');
+      container.innerHTML = '';
+
+      const login_identifier = document.getElementById('login_identifier').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!login_identifier) {
+        container.innerHTML = '<div class="alert alert-danger">Registration number or email is required.</div>';
+        return;
+      }
+
+      if (!password) {
+        container.innerHTML = '<div class="alert alert-danger">Password is required.</div>';
+        return;
+      }
+
+      submitting = true;
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ login_identifier, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message);
+        }
+
+        setToken(data.data.token);
+        setUser(data.data);
+
+        if (data.data.role === 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
+      } catch (error) {
+        container.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        submitting = false;
+      }
+    }
+  </script>
+</body>
+</html>

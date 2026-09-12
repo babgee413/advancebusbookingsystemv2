@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#003366"/>
+  <text x="256" y="190" font-family="Arial,sans-serif" font-size="72" font-weight="800" fill="#f0c040" text-anchor="middle" letter-spacing="4">ATBU</text>
+  <text x="256" y="270" font-family="Arial,sans-serif" font-size="48" font-weight="600" fill="#ffffff" text-anchor="middle">SHUTTLE</text>
+  <rect x="100" y="310" width="312" height="6" rx="3" fill="#f0c040" opacity="0.5"/>
+  <text x="256" y="380" font-family="Arial,sans-serif" font-size="28" fill="rgba(255,255,255,0.6)" text-anchor="middle">Yelwa ↔ Gubi Campus</text>
+  <text x="256" y="420" font-family="Arial,sans-serif" font-size="20" fill="rgba(255,255,255,0.4)" text-anchor="middle">Bus Transport Booking</text>
+</svg>

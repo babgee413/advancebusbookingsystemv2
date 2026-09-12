@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Ticket - ATBU Shuttle</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+  <nav class="navbar" id="main-nav">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBU Shuttle</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="user-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><a href="/admin">Admin</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem;">
+    <div id="ticket-loading" class="skeleton-card" style="max-width:600px;margin:0 auto;">
+      <div class="skeleton skeleton-line long" style="height:20px;margin-bottom:1.5rem;"></div>
+      <div class="skeleton skeleton-line full" style="height:60px;margin-bottom:1rem;"></div>
+      <div class="skeleton skeleton-line long"></div>
+      <div class="skeleton skeleton-line medium"></div>
+      <div class="skeleton skeleton-line long"></div>
+      <div class="skeleton skeleton-line medium"></div>
+      <div class="skeleton skeleton-line short"></div>
+    </div>
+
+    <div id="ticket-content" style="display:none;max-width:600px;margin:0 auto;">
+      <div class="ticket-actions no-print" style="display:flex;gap:1rem;justify-content:flex-end;margin-bottom:1rem;">
+        <button class="btn btn-secondary" onclick="exportPDF()">📄 Download PDF</button>
+        <button class="btn btn-primary" onclick="printTicket()">🖨 Print Ticket</button>
+      </div>
+
+      <div class="bus-ticket" id="ticket-area">
+        <div class="ticket-header">
+          <div class="ticket-logo">ATBU</div>
+          <div class="ticket-title">BUS TICKET</div>
+          <div class="ticket-number" id="t-ticket-number"></div>
+        </div>
+
+        <div class="ticket-route-display">
+          <div class="route-from" id="t-origin"></div>
+          <div class="route-arrow">→</div>
+          <div class="route-to" id="t-destination"></div>
+        </div>
+
+        <div class="ticket-body">
+          <div class="ticket-row"><span class="ticket-label">Passenger Name</span><span class="ticket-value" id="t-name"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Registration No.</span><span class="ticket-value" id="t-reg"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Travel Date</span><span class="ticket-value" id="t-date"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Departure Time</span><span class="ticket-value" id="t-time"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Bus</span><span class="ticket-value" id="t-bus"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Amount Paid</span><span class="ticket-value ticket-amount" id="t-amount"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Payment Status</span><span class="ticket-value" id="t-payment-status"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Booking Status</span><span class="ticket-value" id="t-booking-status"></span></div>
+          <div class="ticket-row"><span class="ticket-label">Payment Ref</span><span class="ticket-value" id="t-ref"></span></div>
+        </div>
+
+        <div class="ticket-footer">
+          <p class="ticket-policy">⚠ Please arrive at the bus stop at least 15 minutes before departure. <strong>Missed buses are non-refundable.</strong></p>
+          <p class="ticket-instruction">Present this ticket to the bus conductor before boarding.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="ticket-error" style="display:none;max-width:600px;margin:0 auto;"></div>
+  </main>
+
+  <footer class="footer no-print">
+    <div class="container"><p>&copy; 2026 ATBU Shuttle. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!requireAuth()) throw new Error('Not authenticated');
+
+    let ticketData = null;
+
+    async function loadTicket() {
+      const params = new URLSearchParams(window.location.search);
+      const ticketNum = params.get('ticket') || localStorage.getItem('last_ticket');
+
+      if (!ticketNum) {
+        document.getElementById('ticket-loading').style.display = 'none';
+        document.getElementById('ticket-error').innerHTML = '<div class="empty-state" style="padding:3rem;"><div class="icon">🔍</div><h3>No ticket specified</h3><p>Please select a ticket to view.</p><a href="/bookings" class="btn btn-primary" style="margin-top:1rem;">View My Tickets</a></div>';
+        document.getElementById('ticket-error').style.display = 'block';
+        return;
+      }
+
+      const res = await apiRequest(`/tickets/${ticketNum}`);
+
+      document.getElementById('ticket-loading').style.display = 'none';
+
+      if (!res || !res.success) {
+        document.getElementById('ticket-error').innerHTML = '<div class="empty-state" style="padding:3rem;"><div class="icon">❌</div><h3>Ticket not found</h3><p>The ticket "' + ticketNum + '" could not be found.</p><a href="/bookings" class="btn btn-primary" style="margin-top:1rem;">View My Tickets</a></div>';
+        document.getElementById('ticket-error').style.display = 'block';
+        return;
+      }
+
+      ticketData = res.data;
+
+      document.getElementById('t-ticket-number').textContent = ticketData.ticket_number;
+      document.getElementById('t-origin').textContent = ticketData.origin;
+      document.getElementById('t-destination').textContent = ticketData.destination;
+      document.getElementById('t-name').textContent = ticketData.passenger_name;
+      document.getElementById('t-reg').textContent = ticketData.registration_number;
+      document.getElementById('t-date').textContent = formatDate(ticketData.departure_date);
+      document.getElementById('t-time').textContent = formatTime(ticketData.departure_time);
+      document.getElementById('t-bus').textContent = `${ticketData.bus_name} (${ticketData.bus_number})`;
+      document.getElementById('t-amount').textContent = formatCurrency(ticketData.amount_paid);
+      document.getElementById('t-payment-status').textContent = ticketData.payment_status === 'paid' ? '✓ PAID' : ticketData.payment_status.toUpperCase();
+      document.getElementById('t-booking-status').textContent = ticketData.booking_status.toUpperCase();
+      document.getElementById('t-ref').textContent = ticketData.payment_reference || 'N/A';
+
+      document.getElementById('ticket-content').style.display = 'block';
+      localStorage.removeItem('last_ticket');
+    }
+
+    function printTicket() {
+      window.print();
+    }
+
+    function exportPDF() {
+      if (!ticketData) return;
+
+      const btn = document.querySelector('.ticket-actions .btn-secondary');
+      const origText = btn.textContent;
+      btn.textContent = 'Generating PDF...';
+      btn.disabled = true;
+
+      const ticketEl = document.getElementById('ticket-area');
+
+      if (typeof html2canvas !== 'undefined') {
+        html2canvas(ticketEl, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: ticketEl.scrollWidth,
+          height: ticketEl.scrollHeight
+        }).then(canvas => {
+          try {
+            const { jsPDF } = window.jspdf;
+            const imgData = canvas.toDataURL('image/png');
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 15;
+            const contentWidth = pageWidth - (margin * 2);
+            const imgRatio = canvas.height / canvas.width;
+            let imgHeight = contentWidth * imgRatio;
+            if (imgHeight > pageHeight - (margin * 2)) {
+              imgHeight = pageHeight - (margin * 2);
+            }
+
+            const doc = new jsPDF('p', 'mm', 'a4');
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text('ATBU Inter-Campus Bus Transport', margin, margin - 3);
+            doc.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
+            doc.setFontSize(7);
+            doc.setTextColor(150);
+            doc.text('Generated by ATBU Shuttle Booking System', margin, pageHeight - 8);
+            doc.text(new Date().toLocaleString(), pageWidth - margin, pageHeight - 8, { align: 'right' });
+            doc.save('Bus-Ticket-' + ticketData.ticket_number + '.pdf');
+
+            btn.textContent = '✓ Downloaded';
+            setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000);
+          } catch (e) {
+            console.error('PDF generation error:', e);
+            generateTextPDF();
+            btn.textContent = origText;
+            btn.disabled = false;
+          }
+        }).catch(() => {
+          generateTextPDF();
+          btn.textContent = origText;
+          btn.disabled = false;
+        });
+      } else {
+        generateTextPDF();
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    }
+
+    function generateTextPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+
+      doc.setFillColor(0, 51, 102);
+      doc.rect(0, 0, 210, 45, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(26);
+      doc.setFont(undefined, 'bold');
+      doc.text('ATBU SHUTTLE', 105, 18, { align: 'center' });
+      doc.setFontSize(13);
+      doc.setFont(undefined, 'normal');
+      doc.text('INTER-CAMPUS BUS TICKET', 105, 28, { align: 'center' });
+      doc.setFontSize(11);
+      doc.text('Abubakar Tafawa Balewa University, Bauchi', 105, 36, { align: 'center' });
+
+      doc.setFillColor(200, 16, 46);
+      doc.roundedRect(65, 48, 80, 10, 2, 2, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Ticket: ' + ticketData.ticket_number, 105, 55, { align: 'center' });
+
+      doc.setFillColor(240, 240, 240);
+      doc.roundedRect(15, 65, 180, 22, 3, 3, 'F');
+      doc.setTextColor(0, 51, 102);
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text(ticketData.origin + '  →  ' + ticketData.destination, 105, 80, { align: 'center' });
+
+      doc.setDrawColor(200);
+      doc.setLineWidth(0.5);
+      doc.line(15, 95, 195, 95);
+
+      let y = 108;
+      doc.setFontSize(11);
+      const leftCol = 20;
+      const rightCol = 105;
+
+      const rows = [
+        ['Passenger Name', ticketData.passenger_name],
+        ['Registration No.', ticketData.registration_number],
+        ['Travel Date', formatDate(ticketData.departure_date)],
+        ['Departure Time', formatTime(ticketData.departure_time)],
+        ['Bus', ticketData.bus_name + ' (' + ticketData.bus_number + ')'],
+      ];
+
+      for (const [label, value] of rows) {
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(100);
+        doc.text(label + ':', leftCol, y);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(30);
+        doc.text(String(value), rightCol, y);
+        y += 9;
+      }
+
+      doc.setDrawColor(200);
+      doc.line(15, y, 195, y);
+      y += 10;
+
+      doc.setFontSize(13);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 51, 102);
+      doc.text('PAYMENT DETAILS', leftCol, y);
+      y += 10;
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(100);
+      doc.text('Amount Paid:', leftCol, y);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(40, 167, 69);
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(formatCurrency(ticketData.amount_paid), rightCol, y);
+      y += 10;
+
+      doc.setFontSize(11);
+      doc.setTextColor(100);
+      doc.setFont(undefined, 'bold');
+      doc.text('Payment Status:', leftCol, y);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(40, 167, 69);
+      doc.text('PAID ✓', rightCol, y);
+      y += 9;
+
+      doc.setTextColor(100);
+      doc.setFont(undefined, 'bold');
+      doc.text('Booking Status:', leftCol, y);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(30);
+      doc.text(ticketData.booking_status.toUpperCase(), rightCol, y);
+      y += 9;
+
+      doc.setTextColor(100);
+      doc.setFont(undefined, 'bold');
+      doc.text('Payment Ref:', leftCol, y);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(30);
+      doc.text(ticketData.payment_reference || 'N/A', rightCol, y);
+      y += 15;
+
+      doc.setFillColor(255, 243, 205);
+      doc.roundedRect(15, y, 180, 28, 3, 3, 'F');
+      doc.setDrawColor(255, 193, 7);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(15, y, 180, 28, 3, 3, 'S');
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(133, 100, 4);
+      doc.text('⚠ IMPORTANT TRAVEL INSTRUCTIONS', 20, y + 8);
+      doc.setFont(undefined, 'normal');
+      doc.text('Please arrive at the bus stop at least 15 minutes before the scheduled departure time.', 20, y + 15);
+      doc.text('Missed buses are non-refundable. Present this ticket to the bus conductor before boarding.', 20, y + 22);
+
+      doc.setFontSize(7);
+      doc.setTextColor(180);
+      doc.text('ATBU Inter-Campus Bus Transport Booking System', 105, 285, { align: 'center' });
+      doc.text('Generated: ' + new Date().toLocaleString(), 105, 289, { align: 'center' });
+
+      doc.save('Bus-Ticket-' + ticketData.ticket_number + '.pdf');
+    }
+
+    loadTicket();
+  </script>
+</body>
+</html>

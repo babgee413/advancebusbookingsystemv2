@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Buses - ATBU Shuttle</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBU Shuttle</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/admin" class="active">Admin</a></li>
+        <li><a href="/admin/buses" class="active">Buses</a></li>
+        <li><a href="/admin/trips">Trips</a></li>
+        <li><a href="/admin/bookings">Bookings</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+      <h1 style="margin:0;">Manage Buses</h1>
+      <button class="btn btn-primary" onclick="showAddForm()">+ Add New Bus</button>
+    </div>
+
+    <div class="card" id="add-form" style="display:none;margin-bottom:1.5rem;">
+      <div class="card-header"><h2>Add New Bus</h2></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group"><label>Bus Name</label><input type="text" id="bus-name" placeholder="e.g., Shuttle E"></div>
+          <div class="form-group"><label>Bus Number</label><input type="text" id="bus-number" placeholder="e.g., ATBU-005"></div>
+          <div class="form-group"><label>Capacity</label><input type="number" id="bus-capacity" value="12" min="1" max="50"></div>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+          <button class="btn btn-primary" onclick="createBus()">Create Bus</button>
+          <button class="btn btn-secondary" onclick="hideAddForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="buses-loading">
+      <div class="skeleton-card" style="margin-bottom:1rem;">
+        <div class="skeleton skeleton-line long"></div>
+        <div class="skeleton skeleton-line medium"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-line long"></div>
+        <div class="skeleton skeleton-line medium"></div>
+      </div>
+    </div>
+
+    <div id="buses-list" style="display:none;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBU Shuttle. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!requireAdmin()) throw new Error('Not admin');
+
+    function showAddForm() { document.getElementById('add-form').style.display = 'block'; }
+    function hideAddForm() { document.getElementById('add-form').style.display = 'none'; }
+
+    async function loadBuses() {
+      const res = await apiRequest('/buses');
+      document.getElementById('buses-loading').style.display = 'none';
+      document.getElementById('buses-list').style.display = 'block';
+
+      if (!res || !res.success) {
+        document.getElementById('buses-list').innerHTML = '<div class="alert alert-error">Failed to load buses. <button class="btn btn-sm btn-primary" onclick="location.reload()" style="margin-left:0.5rem;">Retry</button></div>';
+        return;
+      }
+
+      const buses = res.data;
+      if (buses.length === 0) {
+        document.getElementById('buses-list').innerHTML = '<div class="empty-state"><div class="icon">🚌</div><h3>No buses yet</h3><p>Add your first bus to get started.</p></div>';
+        return;
+      }
+
+      let html = '<div class="bookings-table-wrapper"><table class="bookings-table"><thead><tr><th>Bus Name</th><th>Bus Number</th><th>Capacity</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+      for (const bus of buses) {
+        const statusClass = bus.status === 'active' ? 'status-confirmed' : 'status-cancelled';
+        html += `<tr>
+          <td><strong>${bus.bus_name}</strong></td>
+          <td>${bus.bus_number}</td>
+          <td>${bus.capacity} passengers</td>
+          <td><span class="${statusClass}">${bus.status.toUpperCase()}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="toggleBusStatus(${bus.bus_id}, '${bus.status}')">${bus.status === 'active' ? 'Deactivate' : 'Activate'}</button></td>
+        </tr>`;
+      }
+      html += '</tbody></table></div>';
+      document.getElementById('buses-list').innerHTML = html;
+    }
+
+    async function createBus() {
+      const name = document.getElementById('bus-name').value.trim();
+      const number = document.getElementById('bus-number').value.trim();
+      const capacity = parseInt(document.getElementById('bus-capacity').value);
+
+      if (!name || !number) { alert('Bus name and number are required.'); return; }
+
+      const res = await apiRequest('/buses', {
+        method: 'POST',
+        body: JSON.stringify({ bus_name: name, bus_number: number, capacity })
+      });
+
+      if (res && res.success) {
+        hideAddForm();
+        document.getElementById('bus-name').value = '';
+        document.getElementById('bus-number').value = '';
+        document.getElementById('bus-capacity').value = '12';
+        document.getElementById('buses-loading').style.display = 'block';
+        document.getElementById('buses-list').style.display = 'none';
+        loadBuses();
+      } else {
+        alert(res ? res.message : 'Failed to create bus.');
+      }
+    }
+
+    async function toggleBusStatus(busId, currentStatus) {
+      const newStatus = currentStatus === 'active' ? 'maintenance' : 'active';
+      const res = await apiRequest(`/buses/${busId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res && res.success) {
+        document.getElementById('buses-loading').style.display = 'block';
+        document.getElementById('buses-list').style.display = 'none';
+        loadBuses();
+      }
+    }
+
+    loadBuses();
+  </script>
+</body>
+</html>

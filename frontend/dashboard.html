@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - ATBU Shuttle</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBU Shuttle</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="user-nav">
+        <li><a href="/dashboard" class="active">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/dashboard" class="active">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><a href="/admin">Admin</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container dashboard" id="dashboard-root">
+
+    <!-- Loading State -->
+    <div id="state-loading">
+      <div class="welcome-banner" style="opacity:0.7;">
+        <h1>Welcome</h1>
+        <p>Loading your dashboard...</p>
+      </div>
+      <div class="dashboard-grid" style="margin-top:1.5rem;">
+        <div class="dash-card"><div class="dash-card-icon">🎫</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Upcoming Trips</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">✅</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Confirmed Tickets</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">📋</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Total Bookings</p></div></div>
+      </div>
+      <div class="card" style="margin-top:2rem;">
+        <div class="card-header"><h2>Notifications</h2></div>
+        <div class="card-body">
+          <div class="skeleton skeleton-line long"></div>
+          <div class="skeleton skeleton-line medium"></div>
+          <div class="skeleton skeleton-line long"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-header"><h2>Upcoming Trips</h2></div>
+        <div class="card-body">
+          <div class="skeleton skeleton-line long"></div>
+          <div class="skeleton skeleton-line medium"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-header"><h2>Recent Tickets</h2></div>
+        <div class="card-body">
+          <div class="skeleton skeleton-line long"></div>
+          <div class="skeleton skeleton-line medium"></div>
+        </div>
+      </div>
+      <div id="retry-status" style="text-align:center;margin-top:1.5rem;color:var(--text-muted);font-size:0.9rem;display:none;"></div>
+    </div>
+
+    <!-- Success State -->
+    <div id="state-success" style="display:none;">
+      <div class="welcome-banner">
+        <h1>Welcome, <span id="user-name"></span></h1>
+        <p id="user-info"></p>
+      </div>
+
+      <div class="dashboard-grid" style="margin-top:1.5rem;">
+        <div class="dash-card">
+          <div class="dash-card-icon">🎫</div>
+          <div class="dash-card-info">
+            <h3 id="upcoming-count">0</h3>
+            <p>Upcoming Trips</p>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-icon">✅</div>
+          <div class="dash-card-info">
+            <h3 id="confirmed-count">0</h3>
+            <p>Confirmed Tickets</p>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-icon">📋</div>
+          <div class="dash-card-info">
+            <h3 id="total-count">0</h3>
+            <p>Total Bookings</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:2rem;">
+        <div class="card-header"><h2>Notifications</h2></div>
+        <div class="card-body" id="notifications-list"></div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-header">
+          <h2>Upcoming Trips</h2>
+          <a href="/trips" class="btn btn-sm btn-primary">Book New Ticket</a>
+        </div>
+        <div class="card-body" id="upcoming-trips"></div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-header">
+          <h2>Recent Tickets</h2>
+          <a href="/bookings" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="card-body" id="recent-tickets"></div>
+      </div>
+
+      <div class="card available-trips-section">
+        <div class="card-header">
+          <h2>Available Trips</h2>
+          <a href="/trips" class="btn btn-sm btn-primary">Search All</a>
+        </div>
+        <div class="card-body" id="available-trips"></div>
+      </div>
+
+      <div style="margin-top:2rem;">
+        <h2 style="margin-bottom:1rem;">Quick Actions</h2>
+        <div class="quick-actions">
+          <a href="/trips" class="quick-action-card">
+            <div class="icon">🚌</div>
+            <h3>Book a New Ticket</h3>
+            <p>Search and book available trips</p>
+          </a>
+          <a href="/bookings" class="quick-action-card">
+            <div class="icon">📋</div>
+            <h3>View My Tickets</h3>
+            <p>Manage your existing bookings</p>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="state-error" style="display:none;">
+      <div class="empty-state" style="padding:4rem 2rem;">
+        <div class="icon">⚠️</div>
+        <h3>Unable to load dashboard</h3>
+        <p id="error-message">Something went wrong while loading your data.</p>
+        <p id="error-detail" style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;"></p>
+        <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="loadDashboard()">Try Again</button>
+          <button class="btn btn-secondary" onclick="location.reload()">Reload Page</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBU Shuttle. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!requireAuth()) throw new Error('Not authenticated');
+
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [2000, 4000, 8000];
+    let retryCount = 0;
+    let retryTimer = null;
+
+    function showState(state) {
+      ['loading', 'success', 'error'].forEach(s => {
+        document.getElementById('state-' + s).style.display = s === state ? 'block' : 'none';
+      });
+    }
+
+    function showRetryStatus(message) {
+      const el = document.getElementById('retry-status');
+      el.textContent = message;
+      el.style.display = 'block';
+    }
+
+    function hideRetryStatus() {
+      document.getElementById('retry-status').style.display = 'none';
+    }
+
+    function renderDashboard(data) {
+      const { user, bookings, notifications, availableTrips } = data;
+
+      document.getElementById('user-name').textContent = user.full_name;
+      document.getElementById('user-info').textContent = `${user.registration_number} • ${user.email}`;
+
+      const now = new Date();
+      const upcoming = bookings.filter(b =>
+        b.booking_status === 'confirmed' && new Date(b.departure_date) >= now
+      );
+      const confirmed = bookings.filter(b => b.booking_status === 'confirmed');
+      const tickets = bookings.filter(b => b.booking_status === 'confirmed' || b.booking_status === 'completed');
+
+      document.getElementById('upcoming-count').textContent = upcoming.length;
+      document.getElementById('confirmed-count').textContent = confirmed.length;
+      document.getElementById('total-count').textContent = bookings.length;
+
+      if (upcoming.length === 0) {
+        document.getElementById('upcoming-trips').innerHTML = '<div class="empty-state"><div class="icon">📅</div><h3>No upcoming trips</h3><p>You have no upcoming trips. <a href="/trips">Book a ticket now</a></p></div>';
+      } else {
+        let html = '<div class="trips-list">';
+        for (const t of upcoming.slice(0, 3)) {
+          html += `
+            <div class="trip-card" style="margin-bottom:1rem;">
+              <div class="trip-card-header">
+                <div>
+                  <h3>${t.origin} → ${t.destination}</h3>
+                  <span class="trip-route">Ticket: ${t.ticket_number}</span>
+                </div>
+                <div class="trip-price">${formatCurrency(t.amount_paid)}</div>
+              </div>
+              <div class="trip-card-body">
+                <div class="trip-info">
+                  <span>📅 ${formatDate(t.departure_date)}</span>
+                  <span>🕐 ${formatTime(t.departure_time)}</span>
+                  <span class="status-confirmed">Confirmed</span>
+                </div>
+                <div class="trip-card-footer">
+                  <a href="/ticket?ticket=${t.ticket_number}" class="btn btn-primary btn-sm">View Ticket</a>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        html += '</div>';
+        document.getElementById('upcoming-trips').innerHTML = html;
+      }
+
+      if (tickets.length === 0) {
+        document.getElementById('recent-tickets').innerHTML = '<div class="empty-state"><div class="icon">🎫</div><h3>No tickets yet</h3><p>You haven\'t booked any tickets yet.</p></div>';
+      } else {
+        let html = '<div class="trips-list">';
+        for (const t of tickets.slice(0, 5)) {
+          const statusClass = t.booking_status === 'confirmed' ? 'status-confirmed' : 'status-completed';
+          html += `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:0.5rem;">
+              <div>
+                <strong>${t.ticket_number}</strong>
+                <span style="margin-left:0.5rem;">${t.origin} → ${t.destination}</span>
+                <span style="margin-left:0.5rem;color:var(--text-secondary);">${formatDate(t.departure_date)}</span>
+              </div>
+              <div>
+                <span class="${statusClass}" style="margin-right:0.5rem;">${t.booking_status.toUpperCase()}</span>
+                <a href="/ticket?ticket=${t.ticket_number}" class="btn btn-sm btn-primary">View</a>
+              </div>
+            </div>
+          `;
+        }
+        html += '</div>';
+        document.getElementById('recent-tickets').innerHTML = html;
+      }
+
+      if (notifications.length === 0) {
+        document.getElementById('notifications-list').innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="icon">🔔</div><h3>No notifications</h3></div>';
+      } else {
+        let html = '';
+        for (const n of notifications.slice(0, 5)) {
+          html += `
+            <div style="padding:0.75rem;border-bottom:1px solid var(--border);${n.is_read ? 'opacity:0.6;' : ''}">
+              <strong>${n.title}</strong>
+              <p style="margin:0.25rem 0 0;font-size:0.9rem;color:var(--text-secondary);">${n.message}</p>
+              <small style="color:var(--text-secondary);">${new Date(n.created_at).toLocaleDateString()}</small>
+            </div>
+          `;
+        }
+        document.getElementById('notifications-list').innerHTML = html;
+      }
+
+      if (availableTrips.length === 0) {
+        document.getElementById('available-trips').innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="icon">🚌</div><h3>No trips available today</h3><p><a href="/trips">Browse all available dates</a></p></div>';
+      } else {
+        let html = '<div class="trips-list">';
+        for (const t of availableTrips) {
+          html += `
+            <div class="trip-card" style="margin-bottom:1rem;">
+              <div class="trip-card-header">
+                <div>
+                  <h3>${t.origin} → ${t.destination}</h3>
+                  <span class="trip-route">${t.bus_name} (${t.bus_number})</span>
+                </div>
+                <div class="trip-price">${formatCurrency(t.price)}</div>
+              </div>
+              <div class="trip-card-body">
+                <div class="trip-info">
+                  <span>🕐 ${formatTime(t.departure_time)}</span>
+                  <span class="status-available">${t.available_spaces}/${t.capacity} Available</span>
+                </div>
+                <div class="trip-card-footer">
+                  <button class="btn btn-primary btn-sm" onclick="selectTrip(${t.trip_id})">Book Ticket</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        html += '</div>';
+        document.getElementById('available-trips').innerHTML = html;
+      }
+    }
+
+    async function fetchDashboardData() {
+      const user = getUser();
+
+      const today = new Date().toISOString().split('T')[0];
+      const [bookingsRes, notifRes, tripsYelwa, tripsGubi] = await Promise.all([
+        apiRequest('/bookings/my'),
+        apiRequest('/bookings/notifications'),
+        apiRequest(`/trips/search?origin=Yelwa+Campus&destination=Gubi+Campus&date=${today}`),
+        apiRequest(`/trips/search?origin=Gubi+Campus&destination=Yelwa+Campus&date=${today}`)
+      ]);
+
+      if (!bookingsRes || !bookingsRes.success) {
+        throw new Error(bookingsRes ? bookingsRes.message : 'Failed to load your bookings. Please check your connection and try again.');
+      }
+
+      let allTrips = [];
+      if (tripsYelwa && tripsYelwa.success) allTrips = allTrips.concat(tripsYelwa.data);
+      if (tripsGubi && tripsGubi.success) allTrips = allTrips.concat(tripsGubi.data);
+      const availableTrips = allTrips.filter(t => t.available_spaces > 0).slice(0, 4);
+
+      return {
+        user,
+        bookings: bookingsRes.data,
+        notifications: notifRes && notifRes.success ? notifRes.data : [],
+        availableTrips
+      };
+    }
+
+    async function loadDashboard() {
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
+      retryCount = 0;
+      hideRetryStatus();
+      showState('loading');
+
+      await attemptLoad();
+    }
+
+    async function attemptLoad() {
+      try {
+        const data = await fetchDashboardData();
+        renderDashboard(data);
+        showState('success');
+        retryCount = 0;
+        hideRetryStatus();
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+        retryCount++;
+
+        if (retryCount < MAX_RETRIES) {
+          const delay = RETRY_DELAYS[retryCount - 1];
+          const seconds = Math.ceil(delay / 1000);
+          showRetryStatus(`Attempt ${retryCount} of ${MAX_RETRIES} failed. Retrying in ${seconds}s...`);
+
+          retryTimer = setTimeout(() => {
+            attemptLoad();
+          }, delay);
+        } else {
+          hideRetryStatus();
+          document.getElementById('error-message').textContent = err.message || 'Something went wrong while loading your dashboard.';
+          document.getElementById('error-detail').textContent = `Failed after ${MAX_RETRIES} attempts. Please check your internet connection and try again.`;
+          showState('error');
+        }
+      }
+    }
+
+    function selectTrip(tripId) {
+      localStorage.setItem('selected_trip_id', tripId);
+      window.location.href = '/booking';
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

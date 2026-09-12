@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - ATBU Shuttle</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBU Shuttle</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/admin" class="active">Admin</a></li>
+        <li><a href="/admin/buses">Buses</a></li>
+        <li><a href="/admin/trips">Trips</a></li>
+        <li><a href="/admin/bookings">Bookings</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container dashboard" id="admin-root">
+
+    <!-- Loading State -->
+    <div id="state-loading">
+      <h1 style="margin-bottom:1.5rem;">Admin Dashboard</h1>
+      <div class="dashboard-grid">
+        <div class="dash-card"><div class="dash-card-icon">🚌</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Active Buses</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">🗺</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Scheduled Trips</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">🎫</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Confirmed Bookings</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">👥</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Total Passengers</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">💰</div><div class="dash-card-info"><div class="skeleton skeleton-line short" style="width:40px;height:28px;margin-bottom:4px;"></div><p>Total Revenue</p></div></div>
+      </div>
+      <div class="card" style="margin-top:2rem;">
+        <div class="card-header"><h2>Recent Bookings</h2></div>
+        <div class="card-body">
+          <div class="skeleton skeleton-line long"></div>
+          <div class="skeleton skeleton-line medium"></div>
+          <div class="skeleton skeleton-line long"></div>
+        </div>
+      </div>
+      <div id="retry-status" style="text-align:center;margin-top:1.5rem;color:var(--text-muted);font-size:0.9rem;display:none;"></div>
+    </div>
+
+    <!-- Success State -->
+    <div id="state-success" style="display:none;">
+      <h1 style="margin-bottom:1.5rem;">Admin Dashboard</h1>
+
+      <div class="dashboard-grid">
+        <div class="dash-card"><div class="dash-card-icon">🚌</div><div class="dash-card-info"><h3 id="stat-buses">-</h3><p>Active Buses</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">🗺</div><div class="dash-card-info"><h3 id="stat-trips">-</h3><p>Scheduled Trips</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">🎫</div><div class="dash-card-info"><h3 id="stat-bookings">-</h3><p>Confirmed Bookings</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">👥</div><div class="dash-card-info"><h3 id="stat-passengers">-</h3><p>Total Passengers</p></div></div>
+        <div class="dash-card"><div class="dash-card-icon">💰</div><div class="dash-card-info"><h3 id="stat-revenue">-</h3><p>Total Revenue</p></div></div>
+      </div>
+
+      <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap;">
+        <a href="/admin/buses" class="btn btn-primary">Manage Buses</a>
+        <a href="/admin/trips" class="btn btn-primary">Manage Trips</a>
+        <a href="/admin/bookings" class="btn btn-primary">Manage Bookings</a>
+      </div>
+
+      <div class="card" style="margin-top:2rem;">
+        <div class="card-header"><h2>Recent Bookings</h2></div>
+        <div class="card-body" id="recent-bookings"></div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-header"><h2>Audit Log</h2></div>
+        <div class="card-body" id="audit-log"></div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="state-error" style="display:none;">
+      <div class="empty-state" style="padding:4rem 2rem;">
+        <div class="icon">⚠️</div>
+        <h3>Unable to load admin dashboard</h3>
+        <p id="error-message">Something went wrong.</p>
+        <p id="error-detail" style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;"></p>
+        <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="loadAdminDashboard()">Try Again</button>
+          <button class="btn btn-secondary" onclick="location.reload()">Reload Page</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBU Shuttle. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!requireAdmin()) throw new Error('Not admin');
+
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [2000, 4000, 8000];
+    let retryCount = 0;
+    let retryTimer = null;
+
+    function showState(state) {
+      ['loading', 'success', 'error'].forEach(s => {
+        document.getElementById('state-' + s).style.display = s === state ? 'block' : 'none';
+      });
+    }
+
+    function showRetryStatus(message) {
+      const el = document.getElementById('retry-status');
+      el.textContent = message;
+      el.style.display = 'block';
+    }
+
+    function hideRetryStatus() {
+      document.getElementById('retry-status').style.display = 'none';
+    }
+
+    function renderAdminDashboard(data) {
+      const { stats, auditLogs } = data;
+
+      document.getElementById('stat-buses').textContent = stats.total_buses;
+      document.getElementById('stat-trips').textContent = stats.total_trips;
+      document.getElementById('stat-bookings').textContent = stats.total_bookings;
+      document.getElementById('stat-passengers').textContent = stats.total_passengers;
+      document.getElementById('stat-revenue').textContent = formatCurrency(stats.total_revenue);
+
+      if (stats.recent_bookings && stats.recent_bookings.length > 0) {
+        let html = '<div class="trips-list">';
+        for (const b of stats.recent_bookings) {
+          html += `<div style="display:flex;justify-content:space-between;padding:0.75rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:0.5rem;">
+            <div><strong>${b.ticket_number}</strong> — ${b.full_name} — ${b.origin} → ${b.destination}</div>
+            <div>${formatDate(b.departure_date)} — <span class="status-confirmed">${b.booking_status}</span></div>
+          </div>`;
+        }
+        html += '</div>';
+        document.getElementById('recent-bookings').innerHTML = html;
+      } else {
+        document.getElementById('recent-bookings').innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="icon">📋</div><h3>No recent bookings</h3></div>';
+      }
+
+      if (auditLogs.length > 0) {
+        let html = '';
+        for (const log of auditLogs.slice(0, 10)) {
+          html += `<div style="padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.9rem;">
+            <strong>${log.action}</strong> — ${log.entity_type} #${log.entity_id || 'N/A'} by ${log.admin_name || 'System'}
+            <span style="color:var(--text-secondary);float:right;">${new Date(log.created_at).toLocaleString()}</span>
+          </div>`;
+        }
+        document.getElementById('audit-log').innerHTML = html;
+      } else {
+        document.getElementById('audit-log').innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="icon">📝</div><h3>No audit logs</h3></div>';
+      }
+    }
+
+    async function fetchAdminData() {
+      const [statsRes, auditRes] = await Promise.all([
+        apiRequest('/trips/stats'),
+        apiRequest('/bookings/audit')
+      ]);
+
+      if (!statsRes || !statsRes.success) {
+        throw new Error(statsRes ? statsRes.message : 'Failed to load admin statistics');
+      }
+
+      return {
+        stats: statsRes.data,
+        auditLogs: auditRes && auditRes.success ? auditRes.data : []
+      };
+    }
+
+    async function loadAdminDashboard() {
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
+      retryCount = 0;
+      hideRetryStatus();
+      showState('loading');
+
+      await attemptLoad();
+    }
+
+    async function attemptLoad() {
+      try {
+        const data = await fetchAdminData();
+        renderAdminDashboard(data);
+        showState('success');
+        retryCount = 0;
+        hideRetryStatus();
+      } catch (err) {
+        console.error('Admin dashboard error:', err);
+        retryCount++;
+
+        if (retryCount < MAX_RETRIES) {
+          const delay = RETRY_DELAYS[retryCount - 1];
+          const seconds = Math.ceil(delay / 1000);
+          showRetryStatus(`Attempt ${retryCount} of ${MAX_RETRIES} failed. Retrying in ${seconds}s...`);
+
+          retryTimer = setTimeout(() => {
+            attemptLoad();
+          }, delay);
+        } else {
+          hideRetryStatus();
+          document.getElementById('error-message').textContent = err.message || 'Something went wrong.';
+          document.getElementById('error-detail').textContent = `Failed after ${MAX_RETRIES} attempts. Please check your connection and try again.`;
+          showState('error');
+        }
+      }
+    }
+
+    loadAdminDashboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Trips - ATBU Shuttle</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBU Shuttle</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="auth-nav">
+        <li><a href="/login">Login</a></li>
+      </ul>
+      <ul class="navbar-nav" id="user-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips" class="active">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips" class="active">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><a href="/admin">Admin</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem;">
+    <h1 style="margin-bottom:0.5rem;">Browse Trips</h1>
+    <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Select your route and travel date to find available buses.</p>
+
+    <div class="search-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="origin">From</label>
+          <select id="origin">
+            <option value="">Select departure</option>
+            <option value="Yelwa Campus">Yelwa Campus</option>
+            <option value="Gubi Campus">Gubi Campus</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="destination">To</label>
+          <select id="destination">
+            <option value="">Select destination</option>
+            <option value="Gubi Campus">Gubi Campus</option>
+            <option value="Yelwa Campus">Yelwa Campus</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="travel-date">Date</label>
+          <input type="date" id="travel-date">
+        </div>
+        <div class="form-group" style="align-self:flex-end;">
+          <button class="btn btn-primary" onclick="searchTrips()" style="width:100%;">Search Trips</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="results" style="margin-top:2rem;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBU Shuttle. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!requireAuth()) throw new Error('Not authenticated');
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('travel-date').min = today;
+    document.getElementById('travel-date').value = today;
+
+    document.getElementById('origin').addEventListener('change', function() {
+      const dest = document.getElementById('destination');
+      if (this.value === 'Yelwa Campus') {
+        dest.value = 'Gubi Campus';
+      } else if (this.value === 'Gubi Campus') {
+        dest.value = 'Yelwa Campus';
+      }
+    });
+
+    function showResultsLoading() {
+      document.getElementById('results').innerHTML = `
+        <div class="skeleton-card" style="margin-bottom:1rem;">
+          <div class="skeleton skeleton-line long"></div>
+          <div class="skeleton skeleton-line medium"></div>
+          <div style="display:flex;gap:1rem;margin-top:1rem;">
+            <div class="skeleton skeleton-line short" style="width:120px;height:36px;border-radius:var(--radius);"></div>
+          </div>
+        </div>
+        <div class="skeleton-card" style="margin-bottom:1rem;">
+          <div class="skeleton skeleton-line long"></div>
+          <div class="skeleton skeleton-line medium"></div>
+          <div style="display:flex;gap:1rem;margin-top:1rem;">
+            <div class="skeleton skeleton-line short" style="width:120px;height:36px;border-radius:var(--radius);"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-line long"></div>
+          <div class="skeleton skeleton-line medium"></div>
+          <div style="display:flex;gap:1rem;margin-top:1rem;">
+            <div class="skeleton skeleton-line short" style="width:120px;height:36px;border-radius:var(--radius);"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function searchTrips() {
+      const origin = document.getElementById('origin').value;
+      const destination = document.getElementById('destination').value;
+      const date = document.getElementById('travel-date').value;
+
+      if (!origin || !destination) {
+        document.getElementById('results').innerHTML = '<div class="alert alert-error">Please select both departure and destination.</div>';
+        return;
+      }
+      if (origin === destination) {
+        document.getElementById('results').innerHTML = '<div class="alert alert-error">Departure and destination must be different.</div>';
+        return;
+      }
+
+      showResultsLoading();
+
+      const params = new URLSearchParams({ origin, destination });
+      if (date) params.append('date', date);
+
+      const res = await apiRequest(`/trips/search?${params}`);
+      if (!res || !res.success) {
+        document.getElementById('results').innerHTML = '<div class="alert alert-error">Failed to load trips. Please try again.</div>';
+        return;
+      }
+
+      const trips = res.data;
+      if (trips.length === 0) {
+        document.getElementById('results').innerHTML = '<div class="empty-state"><div class="icon">🚌</div><h3>No trips found</h3><p>There are no available trips for this route on the selected date.</p></div>';
+        return;
+      }
+
+      let html = `<h2 style="margin-bottom:0.5rem;">${origin} → ${destination}</h2>`;
+      html += `<p style="color:var(--text-secondary);margin-bottom:1.5rem;">${formatDate(date)}</p>`;
+      html += '<div class="trips-list">';
+
+      for (const trip of trips) {
+        const isFull = trip.available_spaces <= 0;
+        const statusClass = isFull ? 'status-full' : 'status-available';
+        const statusText = isFull ? 'Fully Booked' : `${trip.available_spaces}/${trip.capacity} Available`;
+
+        html += `
+          <div class="trip-card">
+            <div class="trip-card-header">
+              <div>
+                <h3>${trip.bus_name} (${trip.bus_number})</h3>
+                <span class="trip-route">${trip.origin} → ${trip.destination}</span>
+              </div>
+              <div class="trip-price">${formatCurrency(trip.price)}</div>
+            </div>
+            <div class="trip-card-body">
+              <div class="trip-info">
+                <span>📅 ${formatDate(trip.departure_date)}</span>
+                <span>🕐 ${formatTime(trip.departure_time)}</span>
+                <span class="${statusClass}">${statusText}</span>
+              </div>
+              <div class="trip-card-footer">
+                ${isFull
+                  ? '<button class="btn btn-secondary" disabled>Fully Booked</button>'
+                  : `<button class="btn btn-primary" onclick="selectTrip(${trip.trip_id})">Book Ticket</button>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      html += '</div>';
+      document.getElementById('results').innerHTML = html;
+    }
+
+    function selectTrip(tripId) {
+      localStorage.setItem('selected_trip_id', tripId);
+      window.location.href = '/booking';
+    }
+
+    searchTrips();
+  </script>
+</body>
+</html>

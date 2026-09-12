@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Ticket - ATBU Shuttle</title>
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBU Shuttle</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="user-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/trips">Book Ticket</a></li>
+        <li><a href="/bookings">My Tickets</a></li>
+        <li><a href="/admin">Admin</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem;">
+    <div id="booking-loading" class="skeleton-card" style="max-width:700px;margin:0 auto;">
+      <div class="skeleton skeleton-line long" style="height:20px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem;">
+        <div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line medium"></div></div>
+        <div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line medium"></div></div>
+        <div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line medium"></div></div>
+        <div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line medium"></div></div>
+      </div>
+      <div style="margin-top:1.5rem;"><div class="skeleton skeleton-line short" style="width:160px;height:40px;border-radius:var(--radius);"></div></div>
+    </div>
+
+    <div id="booking-content" style="display:none;max-width:700px;margin:0 auto;">
+      <h1 style="margin-bottom:1.5rem;">Review Your Booking</h1>
+
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header"><h2>Trip Details</h2></div>
+        <div class="card-body">
+          <div class="detail-grid">
+            <div class="detail-item"><label>Route</label><span id="detail-route"></span></div>
+            <div class="detail-item"><label>Travel Date</label><span id="detail-date"></span></div>
+            <div class="detail-item"><label>Departure Time</label><span id="detail-time"></span></div>
+            <div class="detail-item"><label>Bus</label><span id="detail-bus"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header"><h2>Passenger Details</h2></div>
+        <div class="card-body">
+          <div class="detail-grid">
+            <div class="detail-item"><label>Full Name</label><span id="detail-name"></span></div>
+            <div class="detail-item"><label>Registration Number</label><span id="detail-reg"></span></div>
+            <div class="detail-item"><label>Email</label><span id="detail-email"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header"><h2>Payment Summary</h2></div>
+        <div class="card-body">
+          <div class="payment-line"><span>Ticket Price</span><span id="detail-price"></span></div>
+          <div class="payment-line"><span>Booking Fee</span><span>₦0.00</span></div>
+          <div class="payment-line total"><span>Total Amount</span><span id="detail-total"></span></div>
+        </div>
+      </div>
+
+      <div class="policy-warning">
+        <h3>⚠ Important Travel Policy</h3>
+        <p>Please arrive at the bus stop at least <strong>15 minutes before</strong> the scheduled departure time.</p>
+        <p><strong>Missed buses are non-refundable.</strong> If you miss your scheduled bus, your ticket and payment will not be refunded.</p>
+        <label class="checkbox-label">
+          <input type="checkbox" id="accept-policy"> I understand and accept the missed-bus policy
+        </label>
+      </div>
+
+      <div class="demo-notice">
+        <h4>🧪 Demo Mode — Test Payment</h4>
+        <p>This is a simulated payment system. No real money is charged.</p>
+        <p><strong>Test Card:</strong> <span class="demo-code">4242 4242 4242 4242</span> &nbsp; <strong>Expiry:</strong> <span class="demo-code">12/28</span> &nbsp; <strong>CVC:</strong> <span class="demo-code">123</span></p>
+        <p><strong>Bank Transfer:</strong> Any amount — payment auto-confirmed (90% success rate for demo).</p>
+      </div>
+
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header"><h2>Select Payment Method</h2></div>
+        <div class="card-body">
+          <div class="payment-methods">
+            <label class="payment-method active">
+              <input type="radio" name="payment-method" value="card" checked>
+              <span>💳 Card</span>
+            </label>
+            <label class="payment-method">
+              <input type="radio" name="payment-method" value="bank_transfer">
+              <span>🏦 Bank Transfer</span>
+            </label>
+            <label class="payment-method">
+              <input type="radio" name="payment-method" value="wallet">
+              <span>📱 Wallet</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1rem;justify-content:space-between;flex-wrap:wrap;">
+        <a href="/trips" class="btn btn-secondary">← Back to Trips</a>
+        <button class="btn btn-primary btn-lg" id="pay-btn" onclick="processPayment()">Pay Now</button>
+      </div>
+    </div>
+
+    <div id="booking-error" style="display:none;max-width:700px;margin:0 auto;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBU Shuttle. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!requireAuth()) throw new Error('Not authenticated');
+
+    const tripId = localStorage.getItem('selected_trip_id');
+    let tripData = null;
+    let userData = null;
+
+    document.querySelectorAll('.payment-method').forEach(el => {
+      el.addEventListener('click', function() {
+        document.querySelectorAll('.payment-method').forEach(e => e.classList.remove('active'));
+        this.classList.add('active');
+        this.querySelector('input').checked = true;
+      });
+    });
+
+    async function init() {
+      if (!tripId) {
+        document.getElementById('booking-loading').innerHTML = '<div class="empty-state" style="padding:3rem;"><div class="icon">🔍</div><h3>No trip selected</h3><p>Please select a trip to book.</p><a href="/trips" class="btn btn-primary" style="margin-top:1rem;">Browse Trips</a></div>';
+        return;
+      }
+
+      try {
+        const [tripRes, profileRes] = await Promise.all([
+          apiRequest(`/trips/${tripId}`),
+          apiRequest('/auth/profile')
+        ]);
+
+        if (!tripRes || !tripRes.success || !profileRes || !profileRes.success) {
+          throw new Error('Failed to load booking details');
+        }
+
+        tripData = tripRes.data;
+        userData = profileRes.data;
+
+        if (tripData.available_spaces <= 0) {
+          document.getElementById('booking-loading').innerHTML = '<div class="empty-state"><div class="icon">🚫</div><h3>This bus is fully booked</h3><p>Please select a different trip.</p><a href="/trips" class="btn btn-primary" style="margin-top:1rem;">Browse Trips</a></div>';
+          return;
+        }
+
+        document.getElementById('detail-route').textContent = `${tripData.origin} → ${tripData.destination}`;
+        document.getElementById('detail-date').textContent = formatDate(tripData.departure_date);
+        document.getElementById('detail-time').textContent = formatTime(tripData.departure_time);
+        document.getElementById('detail-bus').textContent = `${tripData.bus_name} (${tripData.bus_number})`;
+        document.getElementById('detail-name').textContent = userData.full_name;
+        document.getElementById('detail-reg').textContent = userData.registration_number;
+        document.getElementById('detail-email').textContent = userData.email;
+        document.getElementById('detail-price').textContent = formatCurrency(tripData.price);
+        document.getElementById('detail-total').textContent = formatCurrency(tripData.price);
+
+        document.getElementById('booking-loading').style.display = 'none';
+        document.getElementById('booking-content').style.display = 'block';
+      } catch (err) {
+        document.getElementById('booking-loading').style.display = 'none';
+        document.getElementById('booking-error').innerHTML = '<div class="empty-state" style="padding:3rem;"><div class="icon">⚠️</div><h3>Failed to load booking</h3><p>' + (err.message || 'Please try again.') + '</p><a href="/trips" class="btn btn-primary" style="margin-top:1rem;">Browse Trips</a></div>';
+        document.getElementById('booking-error').style.display = 'block';
+      }
+    }
+
+    async function processPayment() {
+      if (!document.getElementById('accept-policy').checked) {
+        alert('Please accept the missed-bus policy before proceeding.');
+        return;
+      }
+
+      const payBtn = document.getElementById('pay-btn');
+      payBtn.disabled = true;
+      payBtn.textContent = 'Processing...';
+
+      try {
+        const bookingRes = await apiRequest('/bookings', {
+          method: 'POST',
+          body: JSON.stringify({ trip_id: parseInt(tripId) })
+        });
+
+        if (!bookingRes || !bookingRes.success) {
+          throw new Error(bookingRes ? bookingRes.message : 'Failed to create booking');
+        }
+
+        const method = document.querySelector('input[name="payment-method"]:checked').value;
+        const payRes = await apiRequest('/payments/pay', {
+          method: 'POST',
+          body: JSON.stringify({ booking_id: bookingRes.data.booking_id, method })
+        });
+
+        if (payRes && payRes.success) {
+          localStorage.removeItem('selected_trip_id');
+          localStorage.setItem('last_ticket', payRes.data.ticket_number);
+          window.location.href = '/ticket?ticket=' + payRes.data.ticket_number;
+        } else {
+          throw new Error(payRes ? payRes.message : 'Payment failed. Please try again.');
+        }
+      } catch (err) {
+        alert(err.message || 'Something went wrong. Please try again.');
+        payBtn.disabled = false;
+        payBtn.textContent = 'Pay Now';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

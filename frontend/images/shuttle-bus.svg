@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003366;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#c8102e;stop-opacity:0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg3)" rx="12"/>
+  <!-- Road -->
+  <rect x="0" y="180" width="400" height="80" fill="#555"/>
+  <line x1="0" y1="220" x2="400" y2="220" stroke="#FFD700" stroke-width="2" stroke-dasharray="20,15"/>
+  <!-- Bus -->
+  <rect x="100" y="155" width="200" height="70" fill="#c8102e" rx="10"/>
+  <rect x="100" y="148" width="200" height="18" fill="#003366" rx="5"/>
+  <rect x="115" y="170" width="35" height="28" fill="#B3E5FC" rx="3"/>
+  <rect x="160" y="170" width="35" height="28" fill="#B3E5FC" rx="3"/>
+  <rect x="205" y="170" width="35" height="28" fill="#B3E5FC" rx="3"/>
+  <rect x="250" y="170" width="35" height="28" fill="#B3E5FC" rx="3"/>
+  <circle cx="150" cy="232" r="14" fill="#333"/>
+  <circle cx="150" cy="232" r="7" fill="#777"/>
+  <circle cx="260" cy="232" r="14" fill="#333"/>
+  <circle cx="260" cy="232" r="7" fill="#777"/>
+  <text x="200" y="143" font-family="Arial,sans-serif" font-size="13" fill="#003366" font-weight="bold" text-anchor="middle">ATBU SHUTTLE</text>
+  <!-- Ground -->
+  <rect x="0" y="260" width="400" height="40" fill="#43A047"/>
+</svg>

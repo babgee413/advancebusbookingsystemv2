@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0F0FF;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="roadGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#555;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#333;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Sky -->
+  <rect width="1200" height="500" fill="url(#skyGrad)"/>
+  <!-- Clouds -->
+  <ellipse cx="200" cy="80" rx="80" ry="30" fill="white" opacity="0.8"/>
+  <ellipse cx="250" cy="70" rx="60" ry="25" fill="white" opacity="0.9"/>
+  <ellipse cx="160" cy="75" rx="50" ry="20" fill="white" opacity="0.7"/>
+  <ellipse cx="800" cy="100" rx="90" ry="28" fill="white" opacity="0.75"/>
+  <ellipse cx="860" cy="90" rx="55" ry="22" fill="white" opacity="0.85"/>
+  <ellipse cx="1000" cy="60" rx="70" ry="25" fill="white" opacity="0.8"/>
+  <!-- Sun -->
+  <circle cx="1050" cy="80" r="50" fill="#FFD700" opacity="0.9"/>
+  <circle cx="1050" cy="80" r="40" fill="#FFED4E"/>
+  <!-- Ground/Grass -->
+  <rect x="0" y="320" width="1200" height="180" fill="#4CAF50"/>
+  <rect x="0" y="330" width="1200" height="170" fill="#43A047"/>
+  <!-- Road -->
+  <rect x="0" y="370" width="1200" height="80" fill="url(#roadGrad)"/>
+  <line x1="0" y1="410" x2="1200" y2="410" stroke="#FFD700" stroke-width="3" stroke-dasharray="30,20"/>
+  <!-- Yelwa Campus Building -->
+  <rect x="50" y="200" width="200" height="170" fill="#003366" rx="4"/>
+  <rect x="60" y="210" width="40" height="40" fill="#87CEEB" rx="2"/>
+  <rect x="110" y="210" width="40" height="40" fill="#87CEEB" rx="2"/>
+  <rect x="160" y="210" width="40" height="40" fill="#87CEEB" rx="2"/>
+  <rect x="60" y="260" width="40" height="40" fill="#87CEEB" rx="2"/>
+  <rect x="110" y="260" width="40" height="40" fill="#87CEEB" rx="2"/>
+  <rect x="160" y="260" width="40" height="40" fill="#87CEEB" rx="2"/>
+  <rect x="120" y="310" width="60" height="60" fill="#002244" rx="2"/>
+  <text x="150" y="195" font-family="Arial,sans-serif" font-size="14" fill="#003366" font-weight="bold" text-anchor="middle">YELWA CAMPUS</text>
+  <!-- Trees near Yelwa -->
+  <circle cx="300" cy="300" r="35" fill="#2E7D32"/>
+  <circle cx="310" cy="290" r="30" fill="#388E3C"/>
+  <rect x="298" y="310" width="8" height="30" fill="#5D4037"/>
+  <circle cx="350" cy="310" r="25" fill="#2E7D32"/>
+  <rect x="348" y="320" width="6" height="20" fill="#5D4037"/>
+  <!-- Bus -->
+  <rect x="500" y="355" width="180" height="60" fill="#c8102e" rx="8"/>
+  <rect x="500" y="350" width="180" height="15" fill="#003366" rx="4"/>
+  <rect x="510" y="365" width="30" height="25" fill="#B3E5FC" rx="2"/>
+  <rect x="550" y="365" width="30" height="25" fill="#B3E5FC" rx="2"/>
+  <rect x="590" y="365" width="30" height="25" fill="#B3E5FC" rx="2"/>
+  <rect x="630" y="365" width="30" height="25" fill="#B3E5FC" rx="2"/>
+  <rect x="670" y="370" width="8" height="15" fill="#B3E5FC" rx="1"/>
+  <circle cx="535" cy="420" r="12" fill="#333"/>
+  <circle cx="535" cy="420" r="6" fill="#666"/>
+  <circle cx="650" cy="420" r="12" fill="#333"/>
+  <circle cx="650" cy="420" r="6" fill="#666"/>
+  <text x="590" y="348" font-family="Arial,sans-serif" font-size="11" fill="white" font-weight="bold" text-anchor="middle">ATBU SHUTTLE</text>
+  <!-- Gubi Campus Building -->
+  <rect x="850" y="220" width="180" height="150" fill="#003366" rx="4"/>
+  <rect x="860" y="230" width="35" height="35" fill="#87CEEB" rx="2"/>
+  <rect x="905" y="230" width="35" height="35" fill="#87CEEB" rx="2"/>
+  <rect x="950" y="230" width="35" height="35" fill="#87CEEB" rx="2"/>
+  <rect x="860" y="275" width="35" height="35" fill="#87CEEB" rx="2"/>
+  <rect x="905" y="275" width="35" height="35" fill="#87CEEB" rx="2"/>
+  <rect x="950" y="275" width="35" height="35" fill="#87CEEB" rx="2"/>
+  <rect x="910" y="320" width="55" height="50" fill="#002244" rx="2"/>
+  <text x="940" y="215" font-family="Arial,sans-serif" font-size="14" fill="#003366" font-weight="bold" text-anchor="middle">GUBI CAMPUS</text>
+  <!-- Trees near Gubi -->
+  <circle cx="810" cy="300" r="30" fill="#2E7D32"/>
+  <circle cx="820" cy="290" r="25" fill="#388E3C"/>
+  <rect x="808" y="310" width="6" height="25" fill="#5D4037"/>
+  <!-- Arrow between campuses -->
+  <line x1="380" y1="280" x2="780" y2="280" stroke="#c8102e" stroke-width="4" stroke-dasharray="12,6"/>
+  <polygon points="770,270 790,280 770,290" fill="#c8102e"/>
+  <polygon points="390,270 370,280 390,290" fill="#c8102e"/>
+</svg>
