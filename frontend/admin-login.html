@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login - ATBU Shuttle</title>
+  <title>Admin Login - ATBUBusTransportSystem</title>
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
   <nav class="navbar">
     <a href="/" class="navbar-brand">
       <img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'">
-      <span>ATBU Shuttle</span>
+      <span>ATBUBusTransportSystem</span>
     </a>
     <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     <div class="navbar-right">
@@ -98,7 +98,13 @@
           body: JSON.stringify({ login_identifier, password })
         });
 
-        const data = await response.json();
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          throw new Error('Unable to reach the server. Please check your internet connection and try again.');
+        }
 
         if (!response.ok) {
           throw new Error(data.message);

@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ATBU Bus Booking - Inter-Campus Shuttle Service</title>
+  <title>ATBUBusTransportSystem</title>
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ATBU Shuttle">
+  <meta name="apple-mobile-web-app-title" content="ATBUBusTransportSystem">
   <link rel="apple-touch-icon" href="/images/icon-192.svg">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
@@ -16,7 +16,7 @@
   <nav class="navbar">
     <a href="/" class="navbar-brand">
       <img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'">
-      <span>ATBU Shuttle</span>
+      <span>ATBUBusTransportSystem</span>
     </a>
     <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     <div class="navbar-right">
@@ -42,7 +42,7 @@
 
   <section class="hero">
     <div class="hero-content">
-      <h1>Book Your <span>ATBU Shuttle</span> Ticket Online</h1>
+      <h1>Book Your <span>ATBUBusTransportSystem</span> Ticket Online</h1>
       <p>Purchase your bus ticket for the Yelwa ↔ Gubi campus shuttle. Skip the queue, pay online, and travel with confidence. Each bus takes a maximum of <strong>12 passengers</strong> per trip.</p>
       <div class="hero-actions">
         <a href="/register" class="btn btn-primary">Register Now — Free</a>
@@ -64,7 +64,7 @@
       </div>
     </div>
     <div class="hero-illustration">
-      <img src="/images/hero-illustration.svg" alt="ATBU Shuttle">
+      <img src="/images/hero-illustration.svg" alt="ATBUBusTransportSystem">
     </div>
   </section>
 
@@ -109,14 +109,14 @@
   <section class="about-section" id="about">
     <div class="about-grid">
       <div class="about-content">
-        <h2>About the ATBU Shuttle Service</h2>
+        <h2>About the ATBUBusTransportSystem</h2>
         <p>The <strong>Abubakar Tafawa Balewa University (ATBU), Bauchi</strong> operates an inter-campus shuttle service connecting the <strong>Yelwa Campus</strong> and <strong>Gubi Campus</strong>.</p>
         <p>Our online booking system allows registered students to <strong>purchase bus tickets in advance</strong>, eliminating the uncertainty of the traditional boarding process. Each bus has a maximum capacity of <strong>12 passengers</strong> — once a bus is fully booked, it is marked as unavailable.</p>
         <p>Register with your ATBU registration number, log in, select a trip, pay for your ticket, and receive your digital bus ticket. It's that simple.</p>
         <a href="/register" class="btn btn-primary" style="margin-top:1rem;">Get Started Today</a>
       </div>
       <div class="about-image">
-        <img src="/images/shuttle-bus.svg" alt="ATBU Shuttle Bus">
+        <img src="/images/shuttle-bus.svg" alt="ATBUBusTransportSystem Bus">
       </div>
     </div>
   </section>
@@ -249,7 +249,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <h3>ATBU Shuttle</h3>
+          <h3>ATBUBusTransportSystem</h3>
           <p>Inter-campus bus transport booking system for Abubakar Tafawa Balewa University, Bauchi. Connecting Yelwa and Gubi campuses.</p>
         </div>
         <div class="footer-links">
@@ -277,10 +277,24 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 ATBU Inter-Campus Bus Transport Booking System. All rights reserved.</p>
+        <p>&copy; 2026 ATBUBusTransportSystem. All rights reserved.</p>
       </div>
     </div>
   </footer>
+
+  <div id="pwa-install-banner" class="pwa-install-banner">
+    <div class="pwa-install-content">
+      <img src="/images/icon-192.svg" alt="ATBUBusTransportSystem" class="pwa-install-icon">
+      <div class="pwa-install-text">
+        <strong>Install ATBUBusTransportSystem</strong>
+        <span>Add to your home screen for quick access</span>
+      </div>
+      <div class="pwa-install-actions">
+        <button class="btn btn-sm btn-primary" onclick="installPWA()">Install</button>
+        <button class="btn btn-sm btn-ghost" onclick="dismissInstall()">Not now</button>
+      </div>
+    </div>
+  </div>
 
   <script src="/js/auth.js"></script>
   <script>
@@ -302,6 +316,11 @@
     }
 
     loadHomepageStats();
+
+    if (isInstallDismissed()) {
+      var b = document.getElementById('pwa-install-banner');
+      if (b) b.style.display = 'none';
+    }
   </script>
 </body>
 </html>

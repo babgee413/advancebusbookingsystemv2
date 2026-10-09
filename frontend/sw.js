@@ -1,15 +1,20 @@
-const CACHE_NAME = 'atbu-shuttle-v1';
+const CACHE_NAME = 'atbu-shuttle-v2';
 const STATIC_ASSETS = [
   '/',
+  '/login',
+  '/register',
+  '/dashboard',
+  '/trips',
+  '/booking',
+  '/bookings',
   '/css/style.css',
   '/js/auth.js',
   '/manifest.json',
-  '/images/icon-192.png',
-  '/images/icon-512.png'
+  '/images/icon-192.svg',
+  '/images/icon-512.svg'
 ];
 
 const API_CACHE = 'atbu-shuttle-api-v1';
-const API_ROUTES = ['/api/trips/search', '/api/buses'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,15 +43,14 @@ self.addEventListener('fetch', (event) => {
 
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      caches.open(API_CACHE).then((cache) => {
-        return fetch(request).then((response) => {
-          if (response.ok && request.method === 'GET') {
-            cache.put(request, response.clone());
-          }
-          return response;
-        }).catch(() => {
-          return cache.match(request);
-        });
+      fetch(request).then((response) => {
+        if (response.ok && request.method === 'GET') {
+          const clone = response.clone();
+          caches.open(API_CACHE).then((cache) => cache.put(request, clone));
+        }
+        return response;
+      }).catch(() => {
+        return caches.match(request);
       })
     );
     return;
@@ -54,18 +58,15 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
+      const fetched = fetch(request).then((response) => {
         if (response.ok && request.method === 'GET') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return response;
-      });
-    }).catch(() => {
-      if (request.destination === 'document') {
-        return caches.match('/');
-      }
+      }).catch(() => cached);
+
+      return cached || fetched;
     })
   );
 });

@@ -40,7 +40,14 @@ async function apiRequest(url, options = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${url}`, { ...options, headers });
-  const data = await res.json();
+
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (parseErr) {
+    return { success: false, message: 'Unable to reach the server. Please check your internet connection and try again.' };
+  }
 
   if (res.status === 401) {
     logout();
@@ -186,8 +193,44 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-let deferredPrompt;
+let deferredPrompt = null;
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  showInstallBanner();
 });
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  hideInstallBanner();
+});
+
+function showInstallBanner() {
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) banner.classList.add('visible');
+}
+
+function hideInstallBanner() {
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) banner.classList.remove('visible');
+}
+
+function dismissInstall() {
+  hideInstallBanner();
+  try { sessionStorage.setItem('pwa-dismissed', '1'); } catch(e) {}
+}
+
+function isInstallDismissed() {
+  try { return sessionStorage.getItem('pwa-dismissed') === '1'; } catch(e) { return false; }
+}
+
+async function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  if (outcome === 'accepted') {
+    hideInstallBanner();
+  }
+}

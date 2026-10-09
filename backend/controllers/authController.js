@@ -34,12 +34,10 @@ exports.register = async (req, res) => {
   try {
     let { registration_number, full_name, email, password, confirm_password } = req.body;
 
-    // Trim inputs
     if (registration_number) registration_number = registration_number.trim();
     if (full_name) full_name = full_name.trim();
     if (email) email = email.trim();
 
-    // Validate required fields
     if (!registration_number || !full_name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -47,7 +45,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Validate registration number format
     if (!validateRegistrationNumber(registration_number)) {
       return res.status(400).json({
         success: false,
@@ -55,7 +52,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -64,10 +60,8 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Normalize email
     email = normalizeEmail(email);
 
-    // Validate password
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -75,7 +69,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Validate password confirmation
     if (confirm_password && password !== confirm_password) {
       return res.status(400).json({
         success: false,
@@ -83,37 +76,33 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Get a fresh connection for the transaction
     connection = await getConnectionWithRetry();
+    await connection.beginTransaction();
 
-    // Check for duplicate registration number
     const [existingReg] = await connection.query(
-      'SELECT user_id FROM users WHERE registration_number = ?',
+      'SELECT user_id FROM users WHERE registration_number = ? FOR UPDATE',
       [registration_number]
     );
     if (existingReg.length > 0) {
+      await connection.rollback();
       return res.status(409).json({
         success: false,
         message: 'This registration number is already registered'
       });
     }
 
-    // Check for duplicate email
     const [existingEmail] = await connection.query(
-      'SELECT user_id FROM users WHERE email = ?',
+      'SELECT user_id FROM users WHERE email = ? FOR UPDATE',
       [email]
     );
     if (existingEmail.length > 0) {
+      await connection.rollback();
       return res.status(409).json({
         success: false,
         message: 'An account with this email already exists'
       });
     }
 
-    // Use a transaction to ensure atomicity
-    await connection.beginTransaction();
-
-    // Hash password and create user
     const password_hash = await bcrypt.hash(password, 10);
 
     const [result] = await connection.query(
@@ -123,14 +112,12 @@ exports.register = async (req, res) => {
 
     const userId = result.insertId;
 
-    // Generate JWT token
     const token = jwt.sign(
       { user_id: userId, email, role: 'student' },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn }
     );
 
-    // Commit the transaction
     await connection.commit();
 
     res.status(201).json({
@@ -147,7 +134,6 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error('Register error:', error.code, error.message);
-    // Rollback on any error
     if (connection) {
       await connection.rollback().catch(() => {});
     }
@@ -159,7 +145,7 @@ exports.register = async (req, res) => {
       });
     }
 
-    if (error.code === 'ECONNRESET' || error.code === 'PROTOCOL_CONNECTION_LOST') {
+    if (error.code === 'ECONNRESET' || error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
       return res.status(503).json({
         success: false,
         message: "We're having trouble connecting right now. Please try again in a moment."
@@ -251,7 +237,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error.code, error.message);
-    if (error.code === 'ECONNRESET' || error.code === 'PROTOCOL_CONNECTION_LOST') {
+    if (error.code === 'ECONNRESET' || error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
       return res.status(503).json({
         success: false,
         message: "We're having trouble connecting right now. Please try again in a moment."

@@ -16,14 +16,11 @@ const ticketRoutes = require('./routes/ticketRoutes');
 const app = express();
 
 app.use(cors({
-  origin: [
-    'https://atbushuttle.vercel.app',
-    'http://localhost:3000'
-  ],
+  origin: true,
   credentials: true
 }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -36,7 +33,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/tickets', ticketRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'ATBU Bus Booking API is running' });
+  res.json({success: true, message: 'ATBU Bus Booking API is running'});
 });
 
 // Frontend pages
