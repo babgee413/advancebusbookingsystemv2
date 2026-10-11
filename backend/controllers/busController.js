@@ -2,7 +2,26 @@ const pool = require('../config/database');
 
 exports.getAllBuses = async (req, res) => {
   try {
-    const [buses] = await pool.query('SELECT * FROM buses ORDER BY bus_id');
+    const [buses] = await pool.query(`
+      SELECT bu.*,
+        bu.capacity AS total_seats,
+        COALESCE(u.max_booked, 0) AS booked_seats,
+        (bu.capacity - COALESCE(u.max_booked, 0)) AS remaining_seats
+      FROM buses bu
+      LEFT JOIN (
+        SELECT t.bus_id, MAX(COALESCE(c.cnt, 0)) AS max_booked
+        FROM trips t
+        LEFT JOIN (
+          SELECT trip_id, COUNT(*) AS cnt FROM bookings
+          WHERE seat_number IS NOT NULL
+            AND booking_status IN ('pending_payment','confirmed')
+          GROUP BY trip_id
+        ) c ON c.trip_id = t.trip_id
+        WHERE t.status = 'scheduled' AND t.departure_date >= CURDATE()
+        GROUP BY t.bus_id
+      ) u ON u.bus_id = bu.bus_id
+      ORDER BY bu.bus_id
+    `);
     res.json({ success: true, data: buses });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch buses' });

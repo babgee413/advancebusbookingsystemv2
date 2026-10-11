@@ -50,6 +50,8 @@ app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../frontend/a
 app.get('/admin/buses', (req, res) => res.sendFile(path.join(__dirname, '../frontend/admin/buses.html')));
 app.get('/admin/trips', (req, res) => res.sendFile(path.join(__dirname, '../frontend/admin/trips.html')));
 app.get('/admin/bookings', (req, res) => res.sendFile(path.join(__dirname, '../frontend/admin/bookings.html')));
+app.get('/admin/verify', (req, res) => res.sendFile(path.join(__dirname, '../frontend/admin/verify.html')));
+app.get('/verify', (req, res) => res.sendFile(path.join(__dirname, '../frontend/verify.html')));
 
 app.use(errorHandler);
 

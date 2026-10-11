@@ -6,8 +6,13 @@ exports.searchTrips = async (req, res) => {
     
     let query = `
       SELECT t.*, b.bus_name, b.bus_number,
-        (t.capacity - t.confirmed_passengers) as available_spaces,
-        CASE WHEN t.confirmed_passengers >= t.capacity THEN 'fully_booked' ELSE 'available' END as booking_status
+        (t.capacity - (SELECT COUNT(*) FROM bookings bk
+           WHERE bk.trip_id = t.trip_id AND bk.seat_number IS NOT NULL
+             AND bk.booking_status IN ('pending_payment','confirmed'))) as available_spaces,
+        CASE WHEN (SELECT COUNT(*) FROM bookings bk
+             WHERE bk.trip_id = t.trip_id AND bk.seat_number IS NOT NULL
+               AND bk.booking_status IN ('pending_payment','confirmed')) >= t.capacity
+          THEN 'fully_booked' ELSE 'available' END as booking_status
       FROM trips t
       JOIN buses b ON t.bus_id = b.bus_id
       WHERE t.status = 'scheduled'
@@ -41,8 +46,13 @@ exports.getTripById = async (req, res) => {
   try {
     const [trips] = await pool.query(`
       SELECT t.*, b.bus_name, b.bus_number,
-        (t.capacity - t.confirmed_passengers) as available_spaces,
-        CASE WHEN t.confirmed_passengers >= t.capacity THEN 'fully_booked' ELSE 'available' END as booking_status
+        (t.capacity - (SELECT COUNT(*) FROM bookings bk
+           WHERE bk.trip_id = t.trip_id AND bk.seat_number IS NOT NULL
+             AND bk.booking_status IN ('pending_payment','confirmed'))) as available_spaces,
+        CASE WHEN (SELECT COUNT(*) FROM bookings bk
+             WHERE bk.trip_id = t.trip_id AND bk.seat_number IS NOT NULL
+               AND bk.booking_status IN ('pending_payment','confirmed')) >= t.capacity
+          THEN 'fully_booked' ELSE 'available' END as booking_status
       FROM trips t
       JOIN buses b ON t.bus_id = b.bus_id
       WHERE t.trip_id = ?
@@ -156,7 +166,7 @@ exports.cancelTrip = async (req, res) => {
     await connection.beginTransaction();
     await connection.query("UPDATE trips SET status = 'cancelled' WHERE trip_id = ?", [id]);
     await connection.query(
-      "UPDATE bookings SET booking_status = 'cancelled' WHERE trip_id = ? AND booking_status = 'confirmed'",
+      "UPDATE bookings SET booking_status = 'cancelled', seat_number = NULL WHERE trip_id = ? AND booking_status = 'confirmed'",
       [id]
     );
 
