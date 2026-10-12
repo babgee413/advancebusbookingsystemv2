@@ -1056,7 +1056,7 @@ table tbody tr:last-child td {
   font-size: 0.95rem;
 }
 
-/* PWA Install Banner */
+/* PWA Install Bar — fixed section at the bottom of the screen */
 .pwa-install-banner {
   display: none;
   position: fixed;
@@ -1065,19 +1065,18 @@ table tbody tr:last-child td {
   right: 0;
   background: linear-gradient(135deg, var(--primary), #004080);
   color: #fff;
-  padding: 0.875rem 1.5rem;
+  padding: 0.875rem 1.5rem calc(0.875rem + env(safe-area-inset-bottom, 0px));
   z-index: 1100;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
-  animation: slideUp 0.3s ease;
+  border-top: 1px solid rgba(255,255,255,0.15);
 }
 
 .pwa-install-banner.visible {
   display: block;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+body.pwa-install-bar-open {
+  padding-bottom: 76px;
 }
 
 .pwa-install-content {
@@ -2973,6 +2972,10 @@ table tbody tr:last-child td {
 
 .pwa-network-notice.visible {
   bottom: 1.25rem;
+}
+
+body.pwa-install-bar-open .pwa-network-notice.visible {
+  bottom: calc(76px + 1.25rem);
 }
 
 .pwa-network-notice.offline {

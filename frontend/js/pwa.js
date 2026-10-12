@@ -191,6 +191,7 @@ window.PWA = (() => {
     document.querySelectorAll('[data-pwa-inline-install]').forEach((el) => {
       el.innerHTML = cardHTML(el.getAttribute('data-pwa-inline-install') || 'home');
     });
+    renderBar();
   }
 
   function sectionDismissed() {
@@ -200,6 +201,70 @@ window.PWA = (() => {
   function dismissSection() {
     try { sessionStorage.setItem('pwa-section-dismissed', '1'); } catch (e) {}
     renderAll();
+  }
+
+  /* ---------- Fixed install bar (persistent section at the bottom of the screen) ---------- */
+
+  function barDismissed() {
+    try { return sessionStorage.getItem('pwa-dismissed') === '1'; } catch (e) { return false; }
+  }
+
+  function shouldShowBar() {
+    if (isInstalled() || isStandaloneMode) return false;
+    if (barDismissed()) return false;
+    return true;
+  }
+
+  function barPrimary() {
+    if (canPrompt()) return { label: 'Install App', action: 'install' };
+    if (platform === 'ios') return { label: 'Show me how', action: 'steps' };
+    return { label: 'Installation steps', action: 'steps' };
+  }
+
+  function renderBar() {
+    let bar = document.getElementById('pwa-install-banner');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'pwa-install-banner';
+      bar.className = 'pwa-install-banner';
+      document.body.appendChild(bar);
+    }
+
+    if (!shouldShowBar()) {
+      bar.classList.remove('visible');
+      document.body.classList.remove('pwa-install-bar-open');
+      return;
+    }
+
+    const primary = barPrimary();
+    const sub = platform === 'ios'
+      ? 'Add to your Home Screen with Safari’s Share menu'
+      : 'Add to your home screen for quick access';
+
+    bar.innerHTML = `
+      <div class="pwa-install-content">
+        <img src="/images/icon-192.png" alt="" class="pwa-install-icon">
+        <div class="pwa-install-text">
+          <strong>Install ATBUBusTransportSystem</strong>
+          <span>${sub}</span>
+        </div>
+        <div class="pwa-install-actions">
+          <button class="btn btn-sm btn-primary" data-pwa-bar-action>${primary.label}</button>
+          <button class="btn btn-sm btn-ghost" data-pwa-bar-dismiss>Not now</button>
+        </div>
+      </div>`;
+
+    bar.querySelector('[data-pwa-bar-action]').onclick = () => {
+      if (primary.action === 'install') promptInstall();
+      else openInstructions();
+    };
+    bar.querySelector('[data-pwa-bar-dismiss]').onclick = () => {
+      try { sessionStorage.setItem('pwa-dismissed', '1'); } catch (e) {}
+      renderBar();
+    };
+
+    bar.classList.add('visible');
+    document.body.classList.add('pwa-install-bar-open');
   }
 
   /* ---------- Offline / online notices ---------- */
@@ -264,15 +329,12 @@ window.PWA = (() => {
     e.preventDefault();
     deferredPrompt = e;
     renderAll();
-    // Bottom banner on pages that include it (auth.js showInstallBanner also fires).
-    if (typeof showInstallBanner === 'function' && !sectionDismissed()) showInstallBanner();
   });
 
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     markInstalled();
     renderAll();
-    if (typeof hideInstallBanner === 'function') hideInstallBanner();
   });
 
   window.addEventListener('online', updateNetworkNotice);
@@ -307,6 +369,7 @@ window.PWA = (() => {
     openInstructions,
     closeInstructions,
     dismissSection,
+    renderBar,
     renderAll
   };
 })();

@@ -219,6 +219,8 @@ window.addEventListener('appinstalled', () => {
 });
 
 function showInstallBanner() {
+  if (isInstallDismissed()) return;
+  if (typeof window.PWA !== 'undefined' && PWA.renderBar) { PWA.renderBar(); return; }
   const banner = document.getElementById('pwa-install-banner');
   if (banner) banner.classList.add('visible');
 }
@@ -226,6 +228,7 @@ function showInstallBanner() {
 function hideInstallBanner() {
   const banner = document.getElementById('pwa-install-banner');
   if (banner) banner.classList.remove('visible');
+  document.body.classList.remove('pwa-install-bar-open');
 }
 
 function dismissInstall() {

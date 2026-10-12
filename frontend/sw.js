@@ -9,7 +9,7 @@
  *    unconfirmed transaction states. Offline API calls fail fast in the app.
  */
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const STATIC_CACHE = `atbu-static-${VERSION}`;
 const PAGE_CACHE = `atbu-pages-${VERSION}`;
 const API_CACHE = `atbu-api-${VERSION}`; // intentionally kept empty; reserved to block old API caches
@@ -19,6 +19,7 @@ const STATIC_ASSETS = [
   '/js/auth.js',
   '/js/pwa.js',
   '/manifest.json',
+  '/offline.html',
   '/images/icon-192.png',
   '/images/icon-512.png',
   '/images/maskable-512.png',
@@ -27,6 +28,14 @@ const STATIC_ASSETS = [
 ];
 
 const OFFLINE_PAGE = '/offline.html';
+
+const OFFLINE_FALLBACK = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>You're offline — ATBUBusTransportSystem</title>
+<style>body{font-family:system-ui,sans-serif;background:#f4f7fb;color:#1a2b3c;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:1.5rem;text-align:center}
+.box{max-width:420px}h1{font-size:1.4rem}a{display:inline-block;margin-top:1rem;padding:.7rem 1.4rem;background:#003366;color:#fff;text-decoration:none;border-radius:8px}</style></head>
+<body><div class="box"><h1>📡 You're offline</h1><p>This page isn't available offline. Reconnect and try again — booking, payment and verification need an internet connection.</p>
+<a href="/">Try Again</a></div></body></html>`;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -85,7 +94,11 @@ async function networkFirstPage(request) {
     if (cached) return cached;
     const offline = await caches.match(OFFLINE_PAGE);
     if (offline) return offline;
-    throw err;
+    // Last resort: built-in offline response — never surface a raw network error.
+    return new Response(OFFLINE_FALLBACK, {
+      status: 503,
+      headers: { 'Content-Type': 'text/html; charset=UTF-8', 'X-Offline': '1' }
+    });
   }
 }
 
