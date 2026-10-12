@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline — ATBUBusTransportSystem</title>
+  <meta name="theme-color" content="#003366">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBUBusTransportSystem</span></a>
+  </nav>
+
+  <main class="container" style="padding-top:3rem;padding-bottom:3rem;max-width:560px;text-align:center;">
+    <div class="empty-state" style="padding:3rem 1rem;">
+      <div class="icon">📡</div>
+      <h1>You're offline</h1>
+      <p>No internet connection. Booking, payment, and ticket verification require an internet connection.</p>
+      <p style="color:var(--text-muted);font-size:0.9rem;">Your existing tickets and account data stay safe — reconnect to continue.</p>
+      <button class="btn btn-primary" style="margin-top:1.5rem;" onclick="location.reload()">Try Again</button>
+      <div style="margin-top:1rem;">
+        <a href="/" class="btn btn-secondary">Go Home</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBUBusTransportSystem. All rights reserved.</p></div>
+  </footer>
+</body>
+</html>

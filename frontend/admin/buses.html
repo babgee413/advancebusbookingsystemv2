@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -23,6 +23,7 @@
         <li><a href="/admin/buses" class="active">Buses</a></li>
         <li><a href="/admin/trips">Trips</a></li>
         <li><a href="/admin/bookings">Bookings</a></li>
+        <li><a href="/admin/verify">Verify</a></li>
         <li><button class="btn-logout" onclick="logout()">Logout</button></li>
       </ul>
     </div>
@@ -68,6 +69,7 @@
   </footer>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
   <script>
     if (!requireAdmin()) throw new Error('Not admin');
 
@@ -90,13 +92,18 @@
         return;
       }
 
-      let html = '<div class="bookings-table-wrapper"><table class="bookings-table"><thead><tr><th>Bus Name</th><th>Bus Number</th><th>Capacity</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+      let html = '<div class="bookings-table-wrapper"><table class="bookings-table"><thead><tr><th>Bus Name</th><th>Bus Number</th><th>Total Seats</th><th>Booked</th><th>Remaining</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
       for (const bus of buses) {
         const statusClass = bus.status === 'active' ? 'status-confirmed' : 'status-cancelled';
+        const total = bus.total_seats != null ? bus.total_seats : bus.capacity;
+        const booked = bus.booked_seats != null ? bus.booked_seats : 0;
+        const remaining = bus.remaining_seats != null ? bus.remaining_seats : total;
         html += `<tr>
           <td><strong>${bus.bus_name}</strong></td>
           <td>${bus.bus_number}</td>
-          <td>${bus.capacity} passengers</td>
+          <td>${total} seats</td>
+          <td>${booked}</td>
+          <td style="color:${remaining <= 0 ? 'var(--danger,#dc3545)' : 'var(--success,#28a745)'};font-weight:bold;">${remaining}</td>
           <td><span class="${statusClass}">${bus.status.toUpperCase()}</span></td>
           <td><button class="btn btn-sm btn-secondary" onclick="toggleBusStatus(${bus.bus_id}, '${bus.status}')">${bus.status === 'active' ? 'Deactivate' : 'Activate'}</button></td>
         </tr>`;

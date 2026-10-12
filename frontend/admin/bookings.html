@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -23,6 +23,7 @@
         <li><a href="/admin/buses">Buses</a></li>
         <li><a href="/admin/trips">Trips</a></li>
         <li><a href="/admin/bookings" class="active">Bookings</a></li>
+        <li><a href="/admin/verify">Verify</a></li>
         <li><button class="btn-logout" onclick="logout()">Logout</button></li>
       </ul>
     </div>
@@ -100,6 +101,7 @@
   </footer>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
   <script>
     if (!requireAdmin()) throw new Error('Not admin');
 
@@ -134,7 +136,7 @@
         return;
       }
 
-      let html = '<div class="bookings-table-wrapper"><table class="bookings-table"><thead><tr><th>Ticket</th><th>Passenger</th><th>Reg No</th><th>Route</th><th>Date</th><th>Time</th><th>Amount</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead><tbody>';
+      let html = '<div class="bookings-table-wrapper"><table class="bookings-table"><thead><tr><th>Ticket</th><th>Passenger</th><th>Reg No</th><th>Route</th><th>Date</th><th>Time</th><th>Seat</th><th>Amount</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead><tbody>';
       for (const b of bookings) {
         const statusClass = b.booking_status === 'confirmed' ? 'status-confirmed' :
                            b.booking_status === 'cancelled' || b.booking_status === 'rejected' || b.booking_status === 'no_show' ? 'status-cancelled' :
@@ -148,6 +150,7 @@
           <td>${b.origin} → ${b.destination}</td>
           <td>${formatDate(b.departure_date)}</td>
           <td>${formatTime(b.departure_time)}</td>
+          <td><strong>${b.seat_number ? 'Seat ' + String(b.seat_number).padStart(2, '0') : '—'}</strong></td>
           <td>${formatCurrency(b.amount_paid)}</td>
           <td><span class="${statusClass}">${b.booking_status.replace('_', ' ').toUpperCase()}</span></td>
           <td><span class="${payClass}">${b.payment_status.toUpperCase()}</span></td>

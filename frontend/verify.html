@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Ticket - ATBUBusTransportSystem</title>
+  <meta name="theme-color" content="#003366">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBUBusTransportSystem</span></a>
+    <div class="navbar-right">
+      <ul class="navbar-nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="/login">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem;max-width:600px;">
+    <h1 style="text-align:center;margin-bottom:1.5rem;">Ticket Verification</h1>
+    <p style="text-align:center;color:var(--text-muted);margin-bottom:2rem;">Enter a ticket number or QR code value to verify a ticket's validity.</p>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-body">
+        <form id="verify-form" style="display:flex;gap:0.5rem;">
+          <input type="text" id="verify-code" placeholder="Enter ticket number or QR code..." style="flex:1;padding:0.75rem;border:1px solid var(--border-color);border-radius:var(--radius);font-size:1rem;" required>
+          <button type="submit" class="btn btn-primary" id="verify-btn">Verify</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="verify-result" style="display:none;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBUBusTransportSystem. All rights reserved.</p></div>
+  </footer>
+
+  <script>
+    async function apiGet(url) {
+      try {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+        const text = await res.text();
+        try { return JSON.parse(text); } catch { return { success: false, message: 'Unexpected response' }; }
+      } catch {
+        return { success: false, message: 'Network error' };
+      }
+    }
+
+    document.getElementById('verify-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const code = document.getElementById('verify-code').value.trim();
+      if (!code) return;
+
+      const btn = document.getElementById('verify-btn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      const res = await apiGet('/api/tickets/verify/' + encodeURIComponent(code));
+
+      btn.disabled = false;
+      btn.textContent = 'Verify';
+
+      const resultEl = document.getElementById('verify-result');
+      resultEl.style.display = 'block';
+
+      if (res.success && res.data) {
+        const d = res.data;
+        const valid = d.is_valid;
+        resultEl.innerHTML = `
+          <div class="card" style="border-left:4px solid ${valid ? '#28a745' : '#dc3545'};">
+            <div class="card-body">
+              <h2 style="color:${valid ? '#28a745' : '#dc3545'};margin-bottom:1rem;">${valid ? '✓ Valid Ticket' : '✗ Invalid Ticket'}</h2>
+              <div style="display:grid;gap:0.75rem;">
+                <div><strong>Ticket Number:</strong> ${d.ticket_number}</div>
+                <div><strong>Passenger:</strong> ${d.passenger_name}</div>
+                <div><strong>Registration No:</strong> ${d.registration_number}</div>
+                <div><strong>Route:</strong> ${d.origin} → ${d.destination}</div>
+                <div><strong>Date:</strong> ${d.departure_date}</div>
+                <div><strong>Time:</strong> ${d.departure_time}</div>
+                <div><strong>Bus:</strong> ${d.bus_name} (${d.bus_number})</div>
+                <div><strong>Seat:</strong> ${d.seat_number ? 'Seat ' + String(d.seat_number).padStart(2, '0') : 'Not assigned'}</div>
+                <div><strong>Booking Status:</strong> ${d.booking_status}</div>
+                <div><strong>Payment Status:</strong> ${d.payment_status}</div>
+                <div><strong>Check-in:</strong> ${d.check_in_status === 'checked_in' ? 'Checked In ✓' : 'Not Checked In'}</div>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        resultEl.innerHTML = `
+          <div class="card" style="border-left:4px solid #dc3545;">
+            <div class="card-body">
+              <h2 style="color:#dc3545;margin-bottom:1rem;">✗ Ticket Not Found</h2>
+              <p>${res.message || 'No ticket matches that code.'}</p>
+            </div>
+          </div>`;
+      }
+    });
+  </script>
+</body>
+</html>

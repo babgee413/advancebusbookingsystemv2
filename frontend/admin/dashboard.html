@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -23,6 +23,7 @@
         <li><a href="/admin/buses">Buses</a></li>
         <li><a href="/admin/trips">Trips</a></li>
         <li><a href="/admin/bookings">Bookings</a></li>
+        <li><a href="/admin/verify">Verify</a></li>
         <li><button class="btn-logout" onclick="logout()">Logout</button></li>
       </ul>
     </div>
@@ -67,6 +68,7 @@
         <a href="/admin/buses" class="btn btn-primary">Manage Buses</a>
         <a href="/admin/trips" class="btn btn-primary">Manage Trips</a>
         <a href="/admin/bookings" class="btn btn-primary">Manage Bookings</a>
+        <a href="/admin/verify" class="btn btn-primary">Verify Tickets</a>
       </div>
 
       <div class="card" style="margin-top:2rem;">
@@ -100,6 +102,7 @@
   </footer>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
   <script>
     if (!requireAdmin()) throw new Error('Not admin');
 

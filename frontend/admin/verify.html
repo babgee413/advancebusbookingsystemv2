@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Tickets - Admin - ATBUBusTransportSystem</title>
+  <meta name="theme-color" content="#003366">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><img src="/images/school_logo.jpg" alt="ATBU" onerror="this.style.display='none'"><span>ATBUBusTransportSystem</span></a>
+    <button class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <div class="navbar-right">
+      <ul class="navbar-nav" id="admin-nav">
+        <li><a href="/admin">Dashboard</a></li>
+        <li><a href="/admin/bookings">Bookings</a></li>
+        <li><a href="/admin/buses">Buses</a></li>
+        <li><a href="/admin/trips">Trips</a></li>
+        <li><a href="/admin/verify" class="active">Verify</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:2rem;padding-bottom:3rem;max-width:700px;">
+    <h1 style="margin-bottom:1.5rem;">Ticket Verification & Check-In</h1>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header"><h2>Verify Ticket</h2></div>
+      <div class="card-body">
+        <p style="color:var(--text-muted);margin-bottom:1rem;">Enter a ticket number or QR code value to look up and check in a passenger.</p>
+        <form id="verify-form" style="display:flex;gap:0.5rem;">
+          <input type="text" id="verify-code" placeholder="BT-2026-123456 or QR token..." style="flex:1;padding:0.75rem;border:1px solid var(--border-color);border-radius:var(--radius);font-size:1rem;" required>
+          <button type="submit" class="btn btn-primary" id="verify-btn">Look Up</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="verify-result" style="display:none;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 ATBUBusTransportSystem. All rights reserved.</p></div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
+  <script>
+    requireAdmin();
+
+    async function apiGet(url) {
+      const res = await apiRequest(url);
+      return res || { success: false, message: 'Request failed' };
+    }
+
+    async function apiPost(url) {
+      const res = await apiRequest(url, { method: 'POST' });
+      return res || { success: false, message: 'Request failed' };
+    }
+
+    document.getElementById('verify-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const code = document.getElementById('verify-code').value.trim();
+      if (!code) return;
+
+      const btn = document.getElementById('verify-btn');
+      btn.disabled = true;
+      btn.textContent = 'Looking up...';
+
+      const res = await apiGet('/tickets/check-in/' + encodeURIComponent(code));
+
+      btn.disabled = false;
+      btn.textContent = 'Look Up';
+
+      const resultEl = document.getElementById('verify-result');
+      resultEl.style.display = 'block';
+
+      if (res.success && res.data) {
+        const d = res.data;
+        const valid = d.booking_status === 'confirmed' && d.payment_status === 'paid';
+        const checkedIn = d.check_in_status === 'checked_in';
+
+        let actionHtml = '';
+        if (valid && !checkedIn) {
+          actionHtml = `<button class="btn btn-primary" style="margin-top:1rem;width:100%;" onclick="checkIn('${d.ticket_number}')">✓ Check In Passenger</button>`;
+        } else if (checkedIn) {
+          actionHtml = `<div style="margin-top:1rem;padding:0.75rem;background:#d4edda;color:#155724;border-radius:var(--radius);text-align:center;font-weight:bold;">Already Checked In</div>`;
+        } else {
+          actionHtml = `<div style="margin-top:1rem;padding:0.75rem;background:#f8d7da;color:#721c24;border-radius:var(--radius);text-align:center;font-weight:bold;">Cannot Check In — Ticket Invalid</div>`;
+        }
+
+        resultEl.innerHTML = `
+          <div class="card" style="border-left:4px solid ${valid ? '#28a745' : '#dc3545'};">
+            <div class="card-body">
+              <h2 style="color:${valid ? '#28a745' : '#dc3545'};margin-bottom:1rem;">${valid ? '✓ Valid Ticket' : '✗ Invalid Ticket'}</h2>
+              <div style="display:grid;gap:0.75rem;">
+                <div><strong>Ticket Number:</strong> ${d.ticket_number}</div>
+                <div><strong>Passenger:</strong> ${d.passenger_name}</div>
+                <div><strong>Registration No:</strong> ${d.registration_number}</div>
+                <div><strong>Route:</strong> ${d.origin} → ${d.destination}</div>
+                <div><strong>Date:</strong> ${d.departure_date}</div>
+                <div><strong>Time:</strong> ${d.departure_time}</div>
+                <div><strong>Bus:</strong> ${d.bus_name} (${d.bus_number})</div>
+                <div><strong>Seat:</strong> ${d.seat_number ? 'Seat ' + String(d.seat_number).padStart(2, '0') : 'Not assigned'}</div>
+                <div><strong>Booking Status:</strong> ${d.booking_status}</div>
+                <div><strong>Payment Status:</strong> ${d.payment_status}</div>
+                ${checkedIn ? `<div><strong>Checked In At:</strong> ${d.checked_in_at || 'N/A'}</div>
+                <div><strong>Checked In By:</strong> ${d.checked_in_by_name || 'N/A'}</div>` : ''}
+              </div>
+              ${actionHtml}
+            </div>
+          </div>`;
+      } else {
+        resultEl.innerHTML = `
+          <div class="card" style="border-left:4px solid #dc3545;">
+            <div class="card-body">
+              <h2 style="color:#dc3545;margin-bottom:1rem;">✗ Ticket Not Found</h2>
+              <p>${res.message || 'No ticket matches that code.'}</p>
+            </div>
+          </div>`;
+      }
+    });
+
+    async function checkIn(ticketNumber) {
+      if (!confirm('Check in this passenger?')) return;
+
+      const res = await apiPost('/tickets/check-in/' + encodeURIComponent(ticketNumber));
+
+      if (res.success) {
+        alert(res.message || 'Check-in successful');
+        // Re-lookup to refresh status
+        document.getElementById('verify-code').value = ticketNumber;
+        document.getElementById('verify-form').dispatchEvent(new Event('submit'));
+      } else {
+        alert(res.message || 'Check-in failed');
+      }
+    }
+  </script>
+</body>
+</html>

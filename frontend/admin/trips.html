@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -23,6 +23,7 @@
         <li><a href="/admin/buses">Buses</a></li>
         <li><a href="/admin/trips" class="active">Trips</a></li>
         <li><a href="/admin/bookings">Bookings</a></li>
+        <li><a href="/admin/verify">Verify</a></li>
         <li><button class="btn-logout" onclick="logout()">Logout</button></li>
       </ul>
     </div>
@@ -88,6 +89,7 @@
   </footer>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
   <script>
     if (!requireAdmin()) throw new Error('Not admin');
 
@@ -131,7 +133,7 @@
           <td>${formatTime(t.departure_time)}</td>
           <td>${t.bus_name} (${t.bus_number})</td>
           <td>${formatCurrency(t.price)}</td>
-          <td>${t.confirmed_passengers}/${t.capacity}</td>
+          <td>${t.capacity - t.available_spaces}/${t.capacity}</td>
           <td><span class="${statusClass}">${t.booking_status === 'available' ? 'AVAILABLE' : 'FULLY BOOKED'}</span></td>
           <td style="white-space:nowrap;">
             <button class="btn btn-sm btn-secondary" onclick="editTrip(${t.trip_id}, ${t.price}, '${t.departure_time}')">Edit</button>

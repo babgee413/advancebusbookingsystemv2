@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -55,6 +55,7 @@
             <div class="detail-item"><label>Travel Date</label><span id="detail-date"></span></div>
             <div class="detail-item"><label>Departure Time</label><span id="detail-time"></span></div>
             <div class="detail-item"><label>Bus</label><span id="detail-bus"></span></div>
+            <div class="detail-item"><label>Seats Available</label><span id="detail-seats" style="font-weight:bold;color:var(--primary);"></span></div>
           </div>
         </div>
       </div>
@@ -76,6 +77,7 @@
           <div class="payment-line"><span>Ticket Price</span><span id="detail-price"></span></div>
           <div class="payment-line"><span>Booking Fee</span><span>₦0.00</span></div>
           <div class="payment-line total"><span>Total Amount</span><span id="detail-total"></span></div>
+          <p style="margin-top:0.75rem;font-size:0.85rem;color:var(--text-secondary);">Your seat number is assigned automatically at booking and will appear on your ticket.</p>
         </div>
       </div>
 
@@ -92,7 +94,7 @@
         <h4>🧪 Demo Mode — Test Payment</h4>
         <p>This is a simulated payment system. No real money is charged.</p>
         <p><strong>Test Card:</strong> <span class="demo-code">4242 4242 4242 4242</span> &nbsp; <strong>Expiry:</strong> <span class="demo-code">12/28</span> &nbsp; <strong>CVC:</strong> <span class="demo-code">123</span></p>
-        <p><strong>Bank Transfer:</strong> Any amount — payment auto-confirmed (90% success rate for demo).</p>
+        <p><strong>Bank Transfer:</strong> Any amount — payment auto-confirmed instantly.</p>
       </div>
 
       <div class="card" style="margin-bottom:1.5rem;">
@@ -117,7 +119,7 @@
 
       <div style="display:flex;gap:1rem;justify-content:space-between;flex-wrap:wrap;">
         <a href="/trips" class="btn btn-secondary">← Back to Trips</a>
-        <button class="btn btn-primary btn-lg" id="pay-btn" onclick="processPayment()">Pay Now</button>
+        <button class="btn btn-primary btn-lg" id="pay-btn" onclick="processPayment()"><span class="btn-text">Pay Now</span></button>
       </div>
     </div>
 
@@ -129,6 +131,7 @@
   </footer>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
   <script>
     if (!requireAuth()) throw new Error('Not authenticated');
 
@@ -172,6 +175,7 @@
         document.getElementById('detail-date').textContent = formatDate(tripData.departure_date);
         document.getElementById('detail-time').textContent = formatTime(tripData.departure_time);
         document.getElementById('detail-bus').textContent = `${tripData.bus_name} (${tripData.bus_number})`;
+        document.getElementById('detail-seats').textContent = `${tripData.available_spaces} of ${tripData.capacity}`;
         document.getElementById('detail-name').textContent = userData.full_name;
         document.getElementById('detail-reg').textContent = userData.registration_number;
         document.getElementById('detail-email').textContent = userData.email;
@@ -187,15 +191,21 @@
       }
     }
 
+    let submitting = false;
+
     async function processPayment() {
       if (!document.getElementById('accept-policy').checked) {
         alert('Please accept the missed-bus policy before proceeding.');
         return;
       }
 
+      if (submitting) return;
+      submitting = true;
+
       const payBtn = document.getElementById('pay-btn');
+      const btnText = payBtn.querySelector('.btn-text');
       payBtn.disabled = true;
-      payBtn.textContent = 'Processing...';
+      payBtn.classList.add('loading');
 
       try {
         const bookingRes = await apiRequest('/bookings', {
@@ -205,6 +215,13 @@
 
         if (!bookingRes || !bookingRes.success) {
           throw new Error(bookingRes ? bookingRes.message : 'Failed to create booking');
+        }
+
+        if (bookingRes.data.already_paid || (bookingRes.data.booking_status === 'confirmed' && bookingRes.data.payment_status === 'paid')) {
+          localStorage.removeItem('selected_trip_id');
+          localStorage.setItem('last_ticket', bookingRes.data.ticket_number);
+          window.location.href = '/ticket?ticket=' + bookingRes.data.ticket_number;
+          return;
         }
 
         const method = document.querySelector('input[name="payment-method"]:checked').value;
@@ -223,7 +240,8 @@
       } catch (err) {
         alert(err.message || 'Something went wrong. Please try again.');
         payBtn.disabled = false;
-        payBtn.textContent = 'Pay Now';
+        payBtn.classList.remove('loading');
+        submitting = false;
       }
     }
 

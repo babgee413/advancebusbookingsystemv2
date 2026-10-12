@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ATBUBusTransportSystem</title>
+  <meta name="description" content="Book inter-campus bus tickets for Yelwa ↔ Gubi shuttle at Abubakar Tafawa Balewa University, Bauchi. Install the ATBU Bus app for instant bookings, e-tickets and QR check-in.">
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ATBUBusTransportSystem">
-  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <meta name="apple-mobile-web-app-title" content="ATBU Bus">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -238,6 +240,31 @@
     </div>
   </section>
 
+  <!-- Install App -->
+  <section class="install-section" id="install-app">
+    <div class="install-inner">
+      <div class="install-visual">
+        <div class="install-phone">
+          <img src="/images/icon-192.png" alt="ATBU Bus App">
+        </div>
+      </div>
+      <div class="install-copy">
+        <span class="install-badge">Install App</span>
+        <h2>Take ATBU Bus With You</h2>
+        <p>Install the app on your phone, tablet or computer and open it like any native application — faster access to trip search, booking, e-tickets with QR codes, and ticket verification. No app store required.</p>
+        <div data-pwa-install="home">
+          <!-- Rendered by pwa.js with device-specific install actions -->
+        </div>
+        <ul class="install-feats">
+          <li><span class="tick">✓</span> Works offline</li>
+          <li><span class="tick">✓</span> One-tap access</li>
+          <li><span class="tick">✓</span> Native app feel</li>
+          <li><span class="tick">✓</span> Automatic updates</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="cta-section">
     <h2>Ready to Travel?</h2>
@@ -284,7 +311,7 @@
 
   <div id="pwa-install-banner" class="pwa-install-banner">
     <div class="pwa-install-content">
-      <img src="/images/icon-192.svg" alt="ATBUBusTransportSystem" class="pwa-install-icon">
+      <img src="/images/icon-192.png" alt="ATBUBusTransportSystem" class="pwa-install-icon">
       <div class="pwa-install-text">
         <strong>Install ATBUBusTransportSystem</strong>
         <span>Add to your home screen for quick access</span>
@@ -297,6 +324,7 @@
   </div>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
   <script>
     function toggleFaq(el) {
       el.parentElement.classList.toggle('open');

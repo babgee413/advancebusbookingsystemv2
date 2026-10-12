@@ -2614,3 +2614,464 @@ table tbody tr:last-child td {
     font-size: 1.3rem;
   }
 }
+
+/* ============================
+   PWA — Install sections
+   ============================ */
+.install-section {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 60%, #001a33 100%);
+  color: #fff;
+  padding: 4rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.install-section::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 260px;
+  height: 260px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+
+.install-section::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 220px;
+  height: 220px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+
+.install-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.install-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.install-phone {
+  width: 150px;
+  height: 260px;
+  border: 3px solid rgba(255,255,255,0.35);
+  border-radius: 24px;
+  background: rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+}
+
+.install-phone::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  width: 50px;
+  height: 6px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.install-phone img {
+  width: 84px;
+  height: 84px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+.install-copy {
+  text-align: left;
+}
+
+.install-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.install-copy h2 {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: #fff;
+}
+
+.install-copy > p {
+  color: rgba(255,255,255,0.85);
+  max-width: 560px;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.install-feats {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.install-feats li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius);
+}
+
+.install-feats li .tick {
+  color: #7CFFB2;
+  font-weight: bold;
+}
+
+.install-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: rgba(255,255,255,0.97);
+  color: var(--text-primary, #1a1a2e);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.3);
+  max-width: 640px;
+}
+
+.install-card.compact {
+  box-shadow: var(--shadow, 0 4px 16px rgba(0,0,0,0.08));
+  border: 1px solid var(--border-color, #e3e8ef);
+  background: #fff;
+  max-width: none;
+}
+
+.install-card.installed {
+  background: #f0fff6;
+  border-color: #b7ebc9;
+}
+
+.install-card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+.install-card.compact .install-card-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.install-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.install-card-body strong {
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 0.3rem;
+  color: var(--primary);
+}
+
+.install-card-body p {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #555);
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+}
+
+.install-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.install-status-badge {
+  background: #28a745;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Dashboard / inline install card host */
+[data-pwa-inline-install] {
+  margin-bottom: 1.5rem;
+}
+
+/* ============================
+   PWA — Instructions modal
+   ============================ */
+.pwa-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 20, 45, 0.7);
+  backdrop-filter: blur(3px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.pwa-modal-backdrop.visible {
+  display: flex;
+}
+
+.pwa-modal {
+  background: #fff;
+  color: var(--text-primary, #1a1a2e);
+  border-radius: 16px;
+  max-width: 460px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem 1.75rem 1.75rem;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.pwa-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color, #e3e8ef);
+  background: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-secondary, #555);
+}
+
+.pwa-modal-close:hover {
+  background: #f3f5f9;
+}
+
+.pwa-modal-icon {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.pwa-modal-icon img {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,51,102,0.25);
+}
+
+.pwa-modal h3 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+}
+
+.pwa-modal-intro {
+  text-align: center;
+  color: var(--text-secondary, #555);
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.pwa-steps {
+  margin: 0 0 1.25rem;
+  padding-left: 1.4rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.pwa-steps li {
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: var(--text-primary, #222);
+}
+
+.pwa-steps li::marker {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.pwa-modal-note {
+  font-size: 0.82rem;
+  color: var(--text-muted, #777);
+  background: #f5f7fb;
+  border-left: 3px solid var(--primary);
+  padding: 0.65rem 0.85rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 1.25rem;
+}
+
+.inst-inline-icon {
+  font-weight: 700;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 5px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.85rem;
+}
+
+/* ============================
+   PWA — Network / update notices
+   ============================ */
+.pwa-network-notice {
+  position: fixed;
+  left: 50%;
+  bottom: -80px;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #fff;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  z-index: 1500;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  transition: bottom 0.3s ease;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
+}
+
+.pwa-network-notice.visible {
+  bottom: 1.25rem;
+}
+
+.pwa-network-notice.offline {
+  background: #7f1d1d;
+  border: 1px solid #ef4444;
+}
+
+.pwa-network-notice.online {
+  background: #14532d;
+  border: 1px solid #22c55e;
+}
+
+.pwa-notice-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+}
+
+.pwa-notice-dot.offline { background: #f87171; }
+.pwa-notice-dot.online { background: #4ade80; }
+
+.pwa-update-notice {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: #fff;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  z-index: 1600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  align-items: center;
+  gap: 0.6rem;
+  max-width: calc(100vw - 2rem);
+}
+
+.pwa-update-notice.visible {
+  display: flex;
+}
+
+.pwa-update-notice .btn-ghost {
+  background: transparent;
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.35);
+}
+
+@media (max-width: 768px) {
+  .install-inner {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .install-copy {
+    text-align: center;
+  }
+
+  .install-copy > p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .install-badge {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .install-actions {
+    justify-content: center;
+  }
+
+  .install-feats {
+    text-align: left;
+  }
+
+  .install-phone {
+    width: 120px;
+    height: 210px;
+  }
+
+  .install-copy h2 {
+    font-size: 1.5rem;
+  }
+
+  .install-card {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .install-card .install-actions {
+    width: 100%;
+  }
+
+  .install-card .install-actions .btn {
+    flex: 1;
+  }
+}

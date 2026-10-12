@@ -12,6 +12,8 @@
     { "source": "/admin/buses", "destination": "/admin/buses.html" },
     { "source": "/admin/trips", "destination": "/admin/trips.html" },
     { "source": "/admin/bookings", "destination": "/admin/bookings.html" },
+    { "source": "/admin/verify", "destination": "/admin/verify.html" },
+    { "source": "/verify", "destination": "/verify.html" },
     { "source": "/(.*)", "destination": "/$1" }
   ]
 }

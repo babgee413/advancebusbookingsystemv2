@@ -7,7 +7,9 @@
   <meta name="theme-color" content="#003366">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/images/icon-192.svg">
+  <meta name="apple-mobile-web-app-title" content="ATBU Bus">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -145,6 +147,15 @@
           </a>
         </div>
       </div>
+
+      <!-- Install App section -->
+      <div class="card" style="margin-top:2rem;" id="dashboard-install-card">
+        <div class="card-header"><h2>📱 Install App</h2></div>
+        <div class="card-body">
+          <p style="color:var(--text-secondary);font-size:0.92rem;margin-bottom:1rem;">Add ATBUBusTransportSystem to your device for faster access — works like a native app, no app store needed.</p>
+          <div data-pwa-inline-install="dashboard"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Error State -->
@@ -168,7 +179,7 @@
 
   <div id="pwa-install-banner" class="pwa-install-banner">
     <div class="pwa-install-content">
-      <img src="/images/icon-192.svg" alt="ATBUBusTransportSystem" class="pwa-install-icon">
+      <img src="/images/icon-192.png" alt="ATBUBusTransportSystem" class="pwa-install-icon">
       <div class="pwa-install-text">
         <strong>Install ATBUBusTransportSystem</strong>
         <span>Add to your home screen for quick access</span>
@@ -181,6 +192,7 @@
   </div>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/pwa.js"></script>
   <script>
     if (!requireAuth()) throw new Error('Not authenticated');
 

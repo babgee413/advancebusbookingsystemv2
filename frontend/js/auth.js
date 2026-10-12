@@ -39,7 +39,19 @@ async function apiRequest(url, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${url}`, { ...options, headers });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${url}`, { ...options, headers });
+  } catch (networkErr) {
+    // Offline or server unreachable — never pretend a transaction succeeded.
+    if (!navigator.onLine) window.dispatchEvent(new Event('offline'));
+    return {
+      success: false,
+      message: navigator.onLine
+        ? 'Unable to reach the server. Please try again in a moment.'
+        : 'You are currently offline. Booking, payment and verification require an internet connection.'
+    };
+  }
 
   const text = await res.text();
   let data;
@@ -189,7 +201,7 @@ document.addEventListener('DOMContentLoaded', setupNav);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {});
   });
 }
 
