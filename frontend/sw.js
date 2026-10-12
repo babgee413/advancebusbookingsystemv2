@@ -9,7 +9,7 @@
  *    unconfirmed transaction states. Offline API calls fail fast in the app.
  */
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const STATIC_CACHE = `atbu-static-${VERSION}`;
 const PAGE_CACHE = `atbu-pages-${VERSION}`;
 const API_CACHE = `atbu-api-${VERSION}`; // intentionally kept empty; reserved to block old API caches

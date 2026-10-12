@@ -80,11 +80,11 @@ window.PWA = (() => {
       title: 'Install on Desktop',
       intro: 'In <strong>Chrome</strong>, <strong>Edge</strong> or another supported browser:',
       steps: [
-        'Click the <strong>Install</strong> icon in the address bar, or',
-        'Open the browser menu and choose <strong>Install ATBU Bus…</strong> / <strong>Apps ▸ Install this site as an app</strong>.',
-        'Confirm the installation — the app opens in its own window.'
+        'Click the <strong>⋮ menu</strong> (three dots) at the top-right corner of the browser window.',
+        'Open <strong>Cast, save, and share ▸ Install page as app…</strong> — or <strong>More tools ▸ Install page as app…</strong> / <strong>Apps ▸ Install this site as an app</strong>, depending on your browser version.',
+        'Confirm by clicking <strong>Install</strong> — the app opens in its own window with a taskbar / dock icon.'
       ],
-      note: 'On iPhone or iPad, open this page in Safari and use Share ▸ Add to Home Screen.'
+      note: 'If your browser also shows a small install icon at the right end of the address bar, you can click that instead. No install option in the menu? Your browser may not support installing websites as apps — bookmark this page or pin the tab for quick access. On iPhone or iPad, open this page in Safari and use Share ▸ Add to Home Screen.'
     };
   }
 
