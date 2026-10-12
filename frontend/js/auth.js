@@ -200,9 +200,9 @@ function setupNav() {
 document.addEventListener('DOMContentLoaded', setupNav);
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {});
-  });
+  // Register immediately (script is at end of body) so the app becomes
+  // installable as fast as possible and the install prompt can fire.
+  navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {});
 }
 
 let deferredPrompt = null;
@@ -241,6 +241,7 @@ function isInstallDismissed() {
 }
 
 async function installPWA() {
+  if (typeof window.PWA !== 'undefined' && PWA.promptInstall) return PWA.promptInstall();
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;

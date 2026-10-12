@@ -34,18 +34,86 @@ window.PWA = (() => {
     return !!deferredPrompt && !isInstalled();
   }
 
-  async function promptInstall() {
-    if (!deferredPrompt) return { outcome: 'unavailable' };
-    deferredPrompt.prompt();
+  /* The native install event can arrive a second or two after page load.
+     When it hasn't fired yet, wait briefly for it before giving up. */
+  const PROMPT_WAIT_MS = 3500;
+  let promptPending = false;
+
+  function waitForPrompt(ms) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (v) => {
+        if (settled) return;
+        settled = true;
+        window.removeEventListener('beforeinstallprompt', onBip);
+        clearTimeout(timer);
+        resolve(v);
+      };
+      const onBip = (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        finish(true);
+      };
+      const timer = setTimeout(() => finish(!!deferredPrompt), ms);
+      window.addEventListener('beforeinstallprompt', onBip);
+      if (deferredPrompt) finish(true);
+    });
+  }
+
+  function setPending(on) {
+    document.querySelectorAll('[data-pwa-install-btn]').forEach((btn) => {
+      if (on) {
+        if (btn.dataset.label === undefined) btn.dataset.label = btn.textContent;
+        btn.textContent = 'Preparing…';
+        btn.disabled = true;
+      } else {
+        if (btn.dataset.label !== undefined) btn.textContent = btn.dataset.label;
+        btn.disabled = false;
+      }
+    });
+  }
+
+  async function runPrompt() {
+    const evt = deferredPrompt;
+    deferredPrompt = null;
+    if (!evt) return { outcome: 'unavailable' };
     let outcome = 'dismissed';
     try {
-      const choice = await deferredPrompt.userChoice;
+      evt.prompt();
+      const choice = await Promise.race([
+        evt.userChoice,
+        new Promise((r) => setTimeout(() => r({ outcome: 'dismissed' }), 8000))
+      ]);
       outcome = choice && choice.outcome ? choice.outcome : 'dismissed';
     } catch (e) {}
-    deferredPrompt = null;
     if (outcome === 'accepted') markInstalled();
-    renderAll();
     return { outcome };
+  }
+
+  async function promptInstall() {
+    if (promptPending) return { outcome: 'pending' };
+    promptPending = true;
+    try {
+      if (!deferredPrompt) {
+        // The install event usually arrives shortly after the service worker
+        // becomes ready (often before the user even clicks). Wait for it before
+        // falling back — the API cannot be detected reliably before it fires.
+        setPending(true);
+        const got = await waitForPrompt(PROMPT_WAIT_MS);
+        setPending(false);
+        if (!got && !deferredPrompt) {
+          openInstructions();
+          return { outcome: 'unavailable' };
+        }
+      }
+      const result = await runPrompt();
+      if (result.outcome !== 'accepted') renderAll();
+      return result;
+    } finally {
+      promptPending = false;
+      setPending(false);
+      renderAll();
+    }
   }
 
   /* ---------- Platform-specific instructions ---------- */
@@ -142,41 +210,26 @@ window.PWA = (() => {
         <div class="install-card ${compact ? 'compact' : ''}">
           <img class="install-card-icon" src="/images/icon-192.png" alt="">
           <div class="install-card-body">
-            <strong>Add to Home Screen</strong>
-            <p>Install on your iPhone or iPad using Safari’s Share menu — no App Store needed.</p>
-            <div class="install-actions">
-              <button class="btn btn-primary" onclick="PWA.openInstructions()">Show me how</button>
-              ${compact ? '' : '<button class="btn btn-secondary" onclick="PWA.dismissSection()">Maybe later</button>'}
-            </div>
-          </div>
-        </div>`;
-    }
-
-    if (canPrompt()) {
-      return `
-        <div class="install-card ${compact ? 'compact' : ''}">
-          <img class="install-card-icon" src="/images/icon-192.png" alt="">
-          <div class="install-card-body">
             <strong>Install ATBU Bus App</strong>
-            <p>Get instant access to bookings, tickets and QR check-in — right from your ${platform === 'android' ? 'home screen' : 'desktop'}.</p>
+            <p>Add to your Home Screen with Safari’s Share menu — no App Store needed.</p>
             <div class="install-actions">
-              <button class="btn btn-primary" onclick="PWA.promptInstall()">Install App</button>
-              <button class="btn btn-secondary" onclick="PWA.openInstructions()">Manual steps</button>
+              <button class="btn btn-primary" data-pwa-install-btn onclick="PWA.promptInstall()">Install App</button>
+              <button class="btn btn-secondary" onclick="PWA.openInstructions()">How to install</button>
             </div>
           </div>
         </div>`;
     }
 
-    // Prompt not (yet) available — offer manual instructions.
+    const target = platform === 'android' ? 'home screen' : 'desktop';
     return `
       <div class="install-card ${compact ? 'compact' : ''}">
         <img class="install-card-icon" src="/images/icon-192.png" alt="">
         <div class="install-card-body">
-          <strong>Install this app</strong>
-          <p>Add ATBUBusTransportSystem to your ${platform === 'android' ? 'home screen' : 'desktop'} in a few taps.</p>
+          <strong>Install ATBU Bus App</strong>
+          <p>Get instant access to bookings, tickets and QR check-in — right from your ${target}.</p>
           <div class="install-actions">
-            <button class="btn btn-primary" onclick="PWA.openInstructions()">Installation steps</button>
-            ${compact ? '' : '<button class="btn btn-secondary" onclick="PWA.dismissSection()">Maybe later</button>'}
+            <button class="btn btn-primary" data-pwa-install-btn onclick="PWA.promptInstall()">Install App</button>
+            <button class="btn btn-secondary" onclick="PWA.openInstructions()">How to install</button>
           </div>
         </div>
       </div>`;
@@ -216,9 +269,7 @@ window.PWA = (() => {
   }
 
   function barPrimary() {
-    if (canPrompt()) return { label: 'Install App', action: 'install' };
-    if (platform === 'ios') return { label: 'Show me how', action: 'steps' };
-    return { label: 'Installation steps', action: 'steps' };
+    return { label: 'Install App', action: 'install' };
   }
 
   function renderBar() {
@@ -249,7 +300,7 @@ window.PWA = (() => {
           <span>${sub}</span>
         </div>
         <div class="pwa-install-actions">
-          <button class="btn btn-sm btn-primary" data-pwa-bar-action>${primary.label}</button>
+          <button class="btn btn-sm btn-primary" data-pwa-bar-action data-pwa-install-btn>${primary.label}</button>
           <button class="btn btn-sm btn-ghost" data-pwa-bar-dismiss>Not now</button>
         </div>
       </div>`;
